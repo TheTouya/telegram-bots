@@ -6,8 +6,8 @@ from telebot.util import quick_markup
 bot = telebot.TeleBot('6945559888:AAFWc1Fv9r300hfn343Nci2sFCCqd6tgwwQ', parse_mode=None)
 
 
-ali_id = 5892994739
-# mobina_id = 1012492053
+admin_id = 5892994739
+
 
 
 the_time = time.time()
@@ -20,15 +20,15 @@ def starting(message):
     for x in blocked_users:
         if x == message.from_user.id:
             bot.reply_to(message, "you are restricted")
-            bot.send_message(ali_id, "A blocked user is begging to send a message")
+            bot.send_message(admin_id, "A blocked user is begging to send a message")
     if message.from_user.id not in blocked_users:
         if message.text == "/me":
             markup = quick_markup({
                 'play list': {'url': 'https://open.spotify.com/playlist/17zQ1hY55qJCOBnKU98hXS?si=-HiZaIOiSxW0gMFqbA26mw'}
             }, row_width=2)
             bot.send_message(message.from_user.id, "<b>Here is my playlist</b>", reply_markup=markup, parse_mode="HTML")
-        elif message.from_user.id == ali_id:
-            bot.send_message(ali_id, "welcome admin")
+        elif message.from_user.id == admin_id:
+            bot.send_message(admin_id, "welcome admin")
         else:
             bot.send_message(message.from_user.id, f"<i>Welcome <a href='tg://user?id={message.from_user.id}'>{message.from_user.first_name}</a>\n"
                                                    f"Please send your message </i>", parse_mode="HTML")
@@ -37,7 +37,7 @@ def starting(message):
                 '🐈‍⬛': {
                     'url': 'https://t.me/talktoal_bot'}
             }, row_width=2)
-            bot.send_message(ali_id,"<b><i>Talk to me</i></b>", reply_markup=markup, parse_mode="HTML")
+            bot.send_message(admin_id,"<b><i>Talk to me</i></b>", reply_markup=markup, parse_mode="HTML")
 
     # bot.send_message(admin_id, f" a message from '{message.from_user.id}")
 
@@ -62,7 +62,7 @@ def block_user(message):
     print(id_user.group())
     blocked_users.append(int(id_user.group()))
     bot.reply_to(message, "this user user is blocked")
-    bot.forward_message(ali_id,message.from_user.id,message.id)
+    bot.forward_message(admin_id,message.from_user.id,message.id)
     print(blocked_users)
 
 
@@ -71,20 +71,20 @@ def send_message(message):
     for x in blocked_users:
         if x == message.from_user.id:
             bot.reply_to(message, "you are blocked by the admin ")
-            bot.send_message(ali_id,"A blocked user is begging to send a message")
+            bot.send_message(admin_id,"A blocked user is begging to send a message")
     if message.from_user.id not in blocked_users:
-        if message.from_user.id == ali_id:
-            bot.send_message(ali_id,"You can't send message to yourself bro")
+        if message.from_user.id == admin_id:
+            bot.send_message(admin_id,"You can't send message to yourself bro")
         else:
-            bot.send_message(ali_id,
+            bot.send_message(admin_id,
          f"<i><b>A message from '{message.from_user.id}' \n\nWith username: "
                 f"'@{message.from_user.username}' \n\nWith first name: '{message.from_user.first_name}' \n\n{current_time}</b></i>", parse_mode="HTML")
-            bot.copy_message(ali_id, message.from_user.id, message.id)
+            bot.copy_message(admin_id, message.from_user.id, message.id)
             markup = quick_markup({
              'reply': {'switch_inline_query_current_chat': f'/$ {message.from_user.id}'},
              'block': {'switch_inline_query_current_chat': f'/block {message.from_user.id}'}
            }, row_width=2)
-            bot.send_message(ali_id, f"<i>{message.from_user.id}</i>", reply_markup=markup, parse_mode="HTML")
+            bot.send_message(admin_id, f"<i>{message.from_user.id}</i>", reply_markup=markup, parse_mode="HTML")
             bot.reply_to(message, "your message has been sent")
 
 
