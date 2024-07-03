@@ -30,8 +30,8 @@ def starting(message):
         elif message.from_user.id == admin_id:
             bot.send_message(admin_id, "welcome admin")
         else:
-            bot.send_message(message.from_user.id, f"<i>Welcome <a href='tg://user?id={message.from_user.id}'>{message.from_user.first_name}</a>\n"
-                                                   f"Please send your message </i>", parse_mode="HTML")
+            bot.send_message(message.from_user.id, f"<b>Welcome <a href='tg://user?id={message.from_user.id}'>{message.from_user.first_name}</a>\n"
+                                                   f"Please send your message </b>", parse_mode="HTML")
         if message.text == "/link":
             markup = quick_markup({
                 '🐈‍⬛': {
