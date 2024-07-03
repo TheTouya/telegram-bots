@@ -91,7 +91,7 @@ def send_message(message):
             bot.send_message(admin_id,f"{message.from_user.id} tried messaging you while being blocked")
     if message.from_user.id not in blocked_users:
         if message.from_user.id == admin_id:
-            bot.send_message(admin_id,"You can't send message to yourself bro")
+            bot.send_message(admin_id,"<b>Hello Admin</b>", parse_mode="HTML")
         else:
             bot.send_message(admin_id,
          f"<i><b>A message from '{message.from_user.id}' \n\nWith username: "
