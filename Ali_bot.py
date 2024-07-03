@@ -79,7 +79,7 @@ def bio(message):
     else:
       bot.send_message(message.from_user.id, f"<b>Hello <a href='tg://user?id={message.from_user.id}'>{message.from_user.first_name}</a>.\n"
                                            f"Thank you so much for using this bot.\n"
-                                           f"If you want more contact @niyeznayu</b>", parse_mode="HTML")
+                                           f"If you want more contact @niyeznayu.</b>", parse_mode="HTML")
       bot.send_message(message.from_user.id, f"<b>Here are all of my socials.</b>", parse_mode="HTML", reply_markup=markup)
 
 
