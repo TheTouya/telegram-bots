@@ -12,7 +12,7 @@ admin_id = 5892994739
 
 the_time = time.time()
 current_time = time.ctime(the_time)
-blocked_users = [1717677479, 5721051983]
+blocked_users = [1717677479]
 
 
 @bot.message_handler(commands=["start","me","link"])
