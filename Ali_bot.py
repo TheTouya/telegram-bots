@@ -12,7 +12,7 @@ admin_id = 5892994739
 
 the_time = time.time()
 current_time = time.ctime(the_time)
-blocked_users = [1717677479]
+blocked_users = [1717677479, 5721051983]
 
 
 @bot.message_handler(commands=["start","me","link"])
@@ -46,12 +46,12 @@ def starting(message):
 def replying(message):
     id_user = re.search(r"\d{8,}", message.text)
     the_msg = re.findall(r"[^/$\d{8,}]", message.text)
-    replyt = '  '
+    reply = '  '
     for x in the_msg:
-        replyt += x
-    print(replyt)
+        reply += x
+    print(reply)
     bot.send_message(int(id_user.group()), "<b><i>You have a new message from admin :</i></b>",parse_mode="HTML")
-    bot.send_message(int(id_user.group()), replyt, protect_content=True)
+    bot.send_message(int(id_user.group()), reply, protect_content=True)
     bot.reply_to(message,"Your message has been sent")
 
 
@@ -66,12 +66,29 @@ def block_user(message):
     print(blocked_users)
 
 
+@bot.message_handler(commands=["bio"])
+def bio(message):
+    markup = quick_markup({
+        'insta 📽️': {"url": "https://www.instagram.com/thetouyas?igsh=dDFibTlqbjB2c2N2"},
+        "github 📟": {"url": "https://github.com/TheTouya"},
+        "gmail 📫": {"url": "https://mail.google.com/mail/?view=cm&fs=1&to=alimojarrad2003@gmail.com&su=Subject&body=Body%20text"}
+    }, row_width=3)
+    if message.from_user.id in blocked_users:
+        bot.send_message(message.from_user.id, "Sorry it looks like you have been blocked by admin :(")
+        bot.send_message(admin_id, f"{message.from_user.id} tried messaging you while being blocked")
+    else:
+      bot.send_message(message.from_user.id, f"<b>Hello <a href='tg://user?id={message.from_user.id}'>{message.from_user.first_name}</a>.\n"
+                                           f"Thank you so much for using this bot.\n"
+                                           f"If you want more contact @niyeznayu</b>", parse_mode="HTML")
+      bot.send_message(message.from_user.id, f"<b>Here are all of my socials.</b>", parse_mode="HTML", reply_markup=markup)
+
+
 @bot.message_handler(content_types=["text", "sticker", "location", "photo", "audio","animation","video","contact","document","voice","venue","dice","video_note"])
 def send_message(message):
     for x in blocked_users:
         if x == message.from_user.id:
-            bot.reply_to(message, "you are blocked by the admin ")
-            bot.send_message(admin_id,"A blocked user is begging to send a message")
+            bot.reply_to(message, "It looks like you have been blocked by the Admin :(")
+            bot.send_message(admin_id,f"{message.from_user.id} tried messaging you while being blocked")
     if message.from_user.id not in blocked_users:
         if message.from_user.id == admin_id:
             bot.send_message(admin_id,"You can't send message to yourself bro")
