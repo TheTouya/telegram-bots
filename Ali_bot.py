@@ -3,10 +3,12 @@ import telebot
 import time
 import re
 from telebot.util import quick_markup
-bot = telebot.TeleBot('6945559888:AAFWc1Fv9r300hfn343Nci2sFCCqd6tgwwQ', parse_mode=None)
+from dotenv import load_dotenv
+load_dotenv()
+api_key = os.getenv('API_KEY')
+bot = telebot.TeleBot(api_key, parse_mode=None)
 
-
-admin_id = 5892994739
+admin_id = os.getenv('ADMIN_ID')
 
 
 
