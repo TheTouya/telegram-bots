@@ -29,7 +29,7 @@ def starting(message):
                 'play list': {'url': 'https://open.spotify.com/playlist/17zQ1hY55qJCOBnKU98hXS?si=-HiZaIOiSxW0gMFqbA26mw'}
             }, row_width=2)
             bot.send_message(message.from_user.id, "<b>Here is my playlist</b>", reply_markup=markup, parse_mode="HTML")
-        elif message.from_user.id == admin_id:
+        elif message.from_user.id == 5892994739:
             bot.send_message(admin_id, "welcome admin")
         else:
             bot.send_message(message.from_user.id, f"<b>Welcome <a href='tg://user?id={message.from_user.id}'>{message.from_user.first_name}</a>\n"
@@ -92,7 +92,7 @@ def send_message(message):
             bot.reply_to(message, "It looks like you have been blocked by the Admin :(")
             bot.send_message(admin_id,f"{message.from_user.id} tried messaging you while being blocked")
     if message.from_user.id not in blocked_users:
-        if message.from_user.id == admin_id:
+        if message.from_user.id == 5892994739:
             bot.send_message(admin_id,"<b>Hello Admin</b>", parse_mode="HTML")
         else:
             bot.send_message(admin_id,
