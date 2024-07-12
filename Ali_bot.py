@@ -46,8 +46,8 @@ def starting(message):
 
 @bot.message_handler(commands=["$"])
 def replying(message):
-    id_user = re.search(r"\d{8,}", message.text)
-    the_msg = re.findall(r"[^/$\d{8,}]", message.text)
+    id_user = re.search(r"\d{6,}", message.text)
+    the_msg = re.findall(r"[^/$\d{6,}]", message.text)
     reply = '  '
     for x in the_msg:
         reply += x
@@ -61,15 +61,21 @@ def replying(message):
          bot.send_message(message.from_user.id, "<b>Only admin has the privilege of replying</b>", parse_mode="HTML")
     except Exception as e:
         bot.send_message(admin_id, f"An error ocuured in replying : {e}")
+
+
 @bot.message_handler(commands=["block"])
 def block_user(message):
-    print(message.text)
-    id_user = re.search(r"\d{10}",message.text)
-    print(id_user.group())
-    blocked_users.append(int(id_user.group()))
-    bot.reply_to(message, "this user user is blocked")
-    bot.forward_message(admin_id,message.from_user.id,message.id)
-    print(blocked_users)
+    id_user = re.search(r"\d{6,}",message.text)
+    try:
+      if message.from_user.id == 5892994739:
+        blocked_users.append(int(id_user.group()))
+        bot.reply_to(message, "this user has been blocked blocked")
+        bot.forward_message(admin_id,message.from_user.id,message.id)
+        print(blocked_users)
+      else:
+          bot.send_message(message.from_user.id, "<b>Only admin has the privilege of blocking</b>", parse_mode="HTML")
+    except Exception as e:
+        bot.send_message(admin_id, f"An error ocurred in blocking : {e}")
 
 
 @bot.message_handler(commands=["bio"])
