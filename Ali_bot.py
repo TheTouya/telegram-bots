@@ -52,11 +52,15 @@ def replying(message):
     for x in the_msg:
         reply += x
     print(reply)
-    bot.send_message(int(id_user.group()), "<b><i>You have a new message from admin :</i></b>",parse_mode="HTML")
-    bot.send_message(int(id_user.group()), reply, protect_content=True)
-    bot.reply_to(message,"Your message has been sent")
-
-
+    try:
+     if message.from_user.id == 5892994739 :
+         bot.send_message(int(id_user.group()), "<b><i>You have a new message from admin :</i></b>", parse_mode="HTML")
+         bot.send_message(int(id_user.group()), reply, protect_content=True)
+         bot.reply_to(message, "Your message has been sent")
+     else:
+         bot.send_message(message.from_user.id, "<b>Only admin has the privilege of replying</b>", parse_mode="HTML")
+    except Exception as e:
+        bot.send_message(admin_id, f"An error ocuured in replying : {e}")
 @bot.message_handler(commands=["block"])
 def block_user(message):
     print(message.text)
