@@ -10,8 +10,8 @@ api_key = os.getenv('API_KEY')
 bot = telebot.TeleBot(api_key, parse_mode=None)
 
 admin_id = os.getenv('ADMIN_ID')
-audio_files_id = os.getenv("AUDIO_FILE_IDS")
-audio_list = audio_files_id.split(",")
+audio_files_id = os.getenv("DSBM_FILE_IDS")
+audio_list_dsbm = audio_files_id.split(",")
 the_time = time.time()
 current_time = time.ctime(the_time)
 blocked_users = [1717677479]
@@ -95,18 +95,26 @@ def bio(message):
       bot.send_message(message.from_user.id, f"<b>Here are all of my socials.</b>", parse_mode="HTML", reply_markup=markup)
 
 
-@bot.message_handler(commands=["song"])
+@bot.message_handler(commands=["dsbm"])
 def send_song(message):
     markup = quick_markup({
         'Thanks for listening.': {'url': 'https://t.me/thetouyas'}
     }, row_width=1)
     random_number = random.randint(0,20)
     try:
-          audio_id = audio_list[random_number]
+          audio_id = audio_list_dsbm[random_number]
           bot.reply_to(message, "Please wait a few moments")
           bot.send_audio(message.from_user.id, audio_id, reply_markup=markup)
     except Exception as e:
         bot.send_message(admin_id, f"There has been a problem with audio sending : {e}")
+
+
+@bot.message_handler(commands=["song"])
+def send_song_list(message):
+    try:
+        bot.send_message(message.from_user.id, f"<b>Hello <a href='tg://user?id={message.from_user.id}'>{message.from_user.first_name}</a>\nHere is the full list of all the avaible music genres:\n/dsbm for dsbm\nThe list will be updated.</b>", parse_mode="HTML")
+    except Exception as e:
+        bot.send_message(admin_id, f"There has been a problem in getting the song list : {e}")
 
 
 @bot.message_handler(content_types=["text", "sticker", "location", "photo", "audio","animation","video","contact","document","voice","venue","dice","video_note"])
