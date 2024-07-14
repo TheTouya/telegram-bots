@@ -3,6 +3,7 @@ import random
 import telebot
 import time
 import re
+from quote import quote
 from telebot.util import quick_markup
 from dotenv import load_dotenv
 load_dotenv()
@@ -60,7 +61,7 @@ def replying(message):
      else:
          bot.send_message(message.from_user.id, "<b>Only admin has the privilege of replying</b>", parse_mode="HTML")
     except Exception as e:
-        bot.send_message(admin_id, f"An error ocuured in replying : {e}")
+        bot.send_message(admin_id, f"An error occurred in replying : {e}")
 
 
 @bot.message_handler(commands=["block"])
@@ -75,7 +76,7 @@ def block_user(message):
       else:
           bot.send_message(message.from_user.id, "<b>Only admin has the privilege of blocking</b>", parse_mode="HTML")
     except Exception as e:
-        bot.send_message(admin_id, f"An error ocurred in blocking : {e}")
+        bot.send_message(admin_id, f"An error occurred in blocking : {e}")
 
 
 @bot.message_handler(commands=["bio"])
@@ -115,6 +116,25 @@ def send_song_list(message):
         bot.send_message(message.from_user.id, f"<b>Hello <a href='tg://user?id={message.from_user.id}'>{message.from_user.first_name}</a>\nHere is the full list of all the avaible music genres:\n/dsbm for dsbm\nThe list will be updated.</b>", parse_mode="HTML")
     except Exception as e:
         bot.send_message(admin_id, f"There has been a problem in getting the song list : {e}")
+
+
+@bot.message_handler(commands=["quote"])
+def send_quote(message):
+    authors_list = ["George Orwell", "Fyodor Dostoevsky", "Franz Kafka", "Albert Camus",
+                    "Leo Tolstoy", "Mark Twain", "Steve Toltz", "Charles Dickens", "William Shakespeare",
+                    "Dante Alighieri", "Marcus Aurelius", "Albert Camus", "Franz kafka"]
+    markup = quick_markup({
+        'Have a great reading.': {'url': 'https://t.me/thetouyas'}
+    }, row_width=1)
+    random_author = random.randint(0,12)
+    bot.reply_to(message, "This might take longer than usual.")
+    try:
+        random_number = random.randint(0, 19)
+        random_quote = quote(search=authors_list[random_author])
+        bot.send_message(message.from_user.id, f"<b>{random_quote[random_number].get("quote")}</b>\n<i>{random_quote[random_number].get("author")}\n{random_quote[random_number].get("book")}</i>", parse_mode="HTML", reply_markup=markup)
+    except Exception as e:
+        bot.send_message(admin_id, f"There has been a problem in quoting : {e}")
+        bot.send_message(message.from_user.id, "Oops, there has been a problem, try again.")
 
 
 @bot.message_handler(content_types=["text", "sticker", "location", "photo", "audio","animation","video","contact","document","voice","venue","dice","video_note"])
