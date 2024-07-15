@@ -11,8 +11,10 @@ api_key = os.getenv('API_KEY')
 bot = telebot.TeleBot(api_key, parse_mode=None)
 
 admin_id = os.getenv('ADMIN_ID')
-audio_files_id = os.getenv("DSBM_FILE_IDS")
-audio_list_dsbm = audio_files_id.split(",")
+dsbm_files_id = os.getenv("DSBM_FILE_IDS")
+jazz_files_id=os.getenv("JAZZ_FILE_IDS")
+jazz_list = jazz_files_id.split(",")
+audio_list_dsbm = dsbm_files_id.split(",")
 the_time = time.time()
 current_time = time.ctime(the_time)
 blocked_users = [1717677479]
@@ -110,28 +112,55 @@ def send_song(message):
         bot.send_message(admin_id, f"There has been a problem with audio sending : {e}")
 
 
+@bot.message_handler(commands=["jazz"])
+def send_song(message):
+    markup = quick_markup({
+        'Thanks for listening.': {'url': 'https://t.me/thetouyas'}
+    }, row_width=1)
+    random_number = random.randint(0,len(jazz_list))
+    try:
+        audio_id = jazz_list[random_number]
+        bot.reply_to(message, "Please wait a few moments")
+        bot.send_audio(message.from_user.id, audio_id, reply_markup=markup)
+    except Exception as e:
+        bot.send_message(admin_id, f"There has been a problem with audio sending : {e}")
+        bot.send_message(message.from_user.id, "oops, there has been a problem. Try again later.")
+
+
+
 @bot.message_handler(commands=["song"])
 def send_song_list(message):
     try:
-        bot.send_message(message.from_user.id, f"<b>Hello <a href='tg://user?id={message.from_user.id}'>{message.from_user.first_name}</a>\nHere is the full list of all the avaible music genres:\n/dsbm for dsbm\nThe list will be updated.</b>", parse_mode="HTML")
+        bot.send_message(message.from_user.id, f"<b>Hello <a href='tg://user?id={message.from_user.id}'>{message.from_user.first_name}</a>\nHere is the full list of all the avaible music genres:\n/dsbm for dsbm\n/jazz for chilling jazz\nThe list will be updated.</b>", parse_mode="HTML")
     except Exception as e:
         bot.send_message(admin_id, f"There has been a problem in getting the song list : {e}")
 
 
 @bot.message_handler(commands=["quote"])
 def send_quote(message):
+    message_list = message.text.split()
+    print(message_list)
     authors_list = ["George Orwell", "Fyodor Dostoevsky", "Franz Kafka", "Albert Camus",
                     "Leo Tolstoy", "Mark Twain", "Steve Toltz", "Charles Dickens", "William Shakespeare",
-                    "Dante Alighieri", "Marcus Aurelius", "Albert Camus", "Franz kafka"]
+                    "Dante Alighieri", "Marcus Aurelius", "Albert Camus", "Franz kafka", "Friedrich Nietzsche"]
     markup = quick_markup({
         'Have a great reading.': {'url': 'https://t.me/thetouyas'}
     }, row_width=1)
-    random_author = random.randint(0,12)
+    random_author = random.randint(0,13)
     bot.reply_to(message, "This might take longer than usual.")
     try:
-        random_number = random.randint(0, 19)
-        random_quote = quote(search=authors_list[random_author])
-        bot.send_message(message.from_user.id, f"<b>{random_quote[random_number].get("quote")}</b>\n<i>{random_quote[random_number].get("author")}\n{random_quote[random_number].get("book")}</i>", parse_mode="HTML", reply_markup=markup)
+        if len(message_list) == 1:
+            random_number = random.randint(0, 19)
+            random_quote = quote(search=authors_list[random_author])
+            bot.send_message(message.from_user.id, f"<b>{random_quote[random_number].get("quote")}</b>\n<i>{random_quote[random_number].get("author")}\n{random_quote[random_number].get("book")}</i>", parse_mode="HTML", reply_markup=markup)
+        elif len(message_list) > 1:
+            message_list.pop(0)
+            text = ' '.join(message_list)
+            random_quotes = quote(search=text)
+            length = len(random_quotes)
+            random_number = random.randint(0, length)
+            bot.send_message(message.from_user.id, f"<b>{random_quotes[random_number].get("quote")}</b>\n<i>{random_quotes[random_number].get("author")}\n{random_quotes[random_number].get("book")}</i>", parse_mode="HTML", reply_markup=markup)
+
     except Exception as e:
         bot.send_message(admin_id, f"There has been a problem in quoting : {e}")
         bot.send_message(message.from_user.id, "Oops, there has been a problem, try again.")
