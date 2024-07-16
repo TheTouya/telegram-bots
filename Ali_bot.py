@@ -72,7 +72,7 @@ def block_user(message):
     try:
       if message.from_user.id == 5892994739:
         blocked_users.append(int(id_user.group()))
-        bot.reply_to(message, "this user has been blocked blocked")
+        bot.reply_to(message, "this user has been blocked")
         bot.forward_message(admin_id,message.from_user.id,message.id)
         print(blocked_users)
       else:
