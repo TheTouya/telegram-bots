@@ -20,6 +20,13 @@ current_time = time.ctime(the_time)
 blocked_users = [1717677479]
 
 
+# @bot.message_handler(content_types=["text"])
+# def get_info(message):
+#     user_id = message.from_user.id
+#     user_info = bot.get_chat(user_id)
+#     bio = user_info.bio if hasattr(user_info, 'bio') else "no bio"
+#     bot.send_message(admin_id, f"{user_info.birthdate.day} {user_info.photo} {user_info.birthdate.month} {user_info.bio}")
+    # bot.send_photo(admin_id, user_info.photo)
 @bot.message_handler(commands=["start","me","link"])
 def starting(message):
     for x in blocked_users:
@@ -127,7 +134,6 @@ def send_song(message):
         bot.send_message(message.from_user.id, "oops, there has been a problem. Try again later.")
 
 
-
 @bot.message_handler(commands=["song"])
 def send_song_list(message):
     try:
@@ -168,24 +174,49 @@ def send_quote(message):
 
 @bot.message_handler(content_types=["text", "sticker", "location", "photo", "audio","animation","video","contact","document","voice","venue","dice","video_note"])
 def send_message(message):
-    for x in blocked_users:
-        if x == message.from_user.id:
-            bot.reply_to(message, "It looks like you have been blocked by the Admin :(")
-            bot.send_message(admin_id,f"{message.from_user.id} tried messaging you while being blocked")
-    if message.from_user.id not in blocked_users:
-        if message.from_user.id == 5892994739:
-            bot.send_message(admin_id,"<b>Hello Admin</b>", parse_mode="HTML")
-        else:
-            bot.send_message(admin_id,
-         f"<i><b>A message from '{message.from_user.id}' \n\nWith username: "
-                f"'@{message.from_user.username}' \n\nWith first name: '{message.from_user.first_name}' \n\n{current_time}</b></i>", parse_mode="HTML")
-            bot.copy_message(admin_id, message.from_user.id, message.id)
-            markup = quick_markup({
-             'reply': {'switch_inline_query_current_chat': f'/$ {message.from_user.id}'},
-             'block': {'switch_inline_query_current_chat': f'/block {message.from_user.id}'}
-           }, row_width=2)
-            bot.send_message(admin_id, f"<i>{message.from_user.id}</i>", reply_markup=markup, parse_mode="HTML")
-            bot.reply_to(message, "your message has been sent")
+    creepy_names = ["-","-", ".", "..", "--", ",", "*", "!", "@", "#", "$", "%", "^", "&"]
+    user_id = message.from_user.id
+    user_info = bot.get_chat(user_id)
+    name = user_info.first_name
+    user_name = user_info.username
+    bio = user_info.bio
+    pfp = user_info.photo
+    main_list = [bio, pfp, user_name]
+
+    def getting_msg(message):
+        bio = bot.get_chat(message.from_user.id).bio
+        try:
+            for x in blocked_users:
+                if x == message.from_user.id:
+                    bot.reply_to(message, "It looks like you have been blocked by the Admin :(")
+                    bot.send_message(admin_id, f"{message.from_user.id} tried messaging you while being blocked")
+            if message.from_user.id not in blocked_users:
+                if message.from_user.id == 5892994739:
+                    bot.send_message(admin_id, "<b>Hello Admin</b>", parse_mode="HTML")
+                else:
+                    bot.send_message(admin_id,
+                                     f"<i><b>A message from '{message.from_user.id}' \n\nWith username: "
+                                     f"'@{message.from_user.username}'\n\nbio: '{bio}'\n\nWith first name: '{message.from_user.first_name}' \n\n{current_time}</b></i>",
+                                     parse_mode="HTML")
+                    bot.copy_message(admin_id, message.from_user.id, message.id)
+                    markup = quick_markup({
+                        'reply': {'switch_inline_query_current_chat': f'/$ {message.from_user.id}'},
+                        'block': {'switch_inline_query_current_chat': f'/block {message.from_user.id}'}
+                    }, row_width=2)
+                    bot.send_message(admin_id, f"<i>{message.from_user.id}</i>", reply_markup=markup, parse_mode="HTML")
+                    bot.reply_to(message, "your message has been sent")
+        except Exception as e:
+            bot.send_message(admin_id, f"There was a problem in getting messages {e}")
+            bot.send_message(message.from_user.id, "Oops there has been an error try again later")
+    if name not in creepy_names or any(main_list):
+        getting_msg(message)
+    else:
+        markup = quick_markup({
+            'reply': {'switch_inline_query_current_chat': f'/$ {message.from_user.id}'},
+            'block': {'switch_inline_query_current_chat': f'/block {message.from_user.id}'}
+        }, row_width=2)
+        bot.reply_to(message, "Sorry you look unknown (╯•﹏•╰)\nMaybe set an username or put pfp to send a message")
+        bot.send_message(admin_id, f"a user with no clear identity tried messaging you.\nname: {message.from_user.first_name}\nid: {message.from_user.id}", reply_markup=markup)
 
 
 bot.infinity_polling()
