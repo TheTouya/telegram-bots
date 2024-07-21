@@ -20,13 +20,6 @@ current_time = time.ctime(the_time)
 blocked_users = [1717677479]
 
 
-# @bot.message_handler(content_types=["text"])
-# def get_info(message):
-#     user_id = message.from_user.id
-#     user_info = bot.get_chat(user_id)
-#     bio = user_info.bio if hasattr(user_info, 'bio') else "no bio"
-#     bot.send_message(admin_id, f"{user_info.birthdate.day} {user_info.photo} {user_info.birthdate.month} {user_info.bio}")
-    # bot.send_photo(admin_id, user_info.photo)
 @bot.message_handler(commands=["start","me","link"])
 def starting(message):
     for x in blocked_users:
@@ -215,7 +208,7 @@ def send_message(message):
             'reply': {'switch_inline_query_current_chat': f'/$ {message.from_user.id}'},
             'block': {'switch_inline_query_current_chat': f'/block {message.from_user.id}'}
         }, row_width=2)
-        bot.reply_to(message, "Sorry you look unknown (╯•﹏•╰)\nMaybe set an username or put pfp to send a message")
+        bot.reply_to(message, "Sorry you look unknown (╯•﹏•╰)\nMaybe set a username or put pfp to send a message")
         bot.send_message(admin_id, f"a user with no clear identity tried messaging you.\nname: {message.from_user.first_name}\nid: {message.from_user.id}", reply_markup=markup)
 
 
