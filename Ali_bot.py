@@ -20,14 +20,14 @@ current_time = time.ctime(the_time)
 blocked_users = [1717677479]
 
 
-@bot.message_handler(commands=["start","me","link"])
+@bot.message_handler(commands=["start","spotify","link"])
 def starting(message):
     for x in blocked_users:
         if x == message.from_user.id:
             bot.reply_to(message, "you are restricted")
             bot.send_message(admin_id, "A blocked user is begging to send a message")
     if message.from_user.id not in blocked_users:
-        if message.text == "/me":
+        if message.text == "/spotify":
             markup = quick_markup({
                 'play list': {'url': 'https://open.spotify.com/playlist/17zQ1hY55qJCOBnKU98hXS?si=-HiZaIOiSxW0gMFqbA26mw'}
             }, row_width=2)
@@ -44,26 +44,22 @@ def starting(message):
             }, row_width=2)
             bot.send_message(admin_id,"<b><i>Talk to me</i></b>", reply_markup=markup, parse_mode="HTML")
 
-    # bot.send_message(admin_id, f" a message from '{message.from_user.id}")
-
 
 @bot.message_handler(commands=["$"])
 def replying(message):
-    id_user = re.search(r"\d{6,}", message.text)
-    the_msg = re.findall(r"[^/$\d{6,}]", message.text)
-    reply = '  '
-    for x in the_msg:
-        reply += x
-    print(reply)
+    main_list = message.text.split()
+    the_id = int(main_list[1])
+    bot.reply_to(message, f"send your reply to {the_id}")
+    bot.register_next_step_handler(message, lambda msg: sending_message(msg , the_id))
+
+
+def sending_message(message, the_id):
     try:
-     if message.from_user.id == 5892994739 :
-         bot.send_message(int(id_user.group()), "<b><i>You have a new message from admin :</i></b>", parse_mode="HTML")
-         bot.send_message(int(id_user.group()), reply, protect_content=True)
-         bot.reply_to(message, "Your message has been sent")
-     else:
-         bot.send_message(message.from_user.id, "<b>Only admin has the privilege of replying</b>", parse_mode="HTML")
+        bot.send_message(the_id, "<b><i>You have a new message from admin :</i></b>", parse_mode="HTML")
+        bot.copy_message(the_id, message.from_user.id, message.id)
+        bot.send_message(admin_id, f"<i>the reply to {the_id} was successful</i>", parse_mode="HTML")
     except Exception as e:
-        bot.send_message(admin_id, f"An error occurred in replying : {e}")
+        bot.send_message(admin_id, f"we got a problem in replying {e}")
 
 
 @bot.message_handler(commands=["block"])
