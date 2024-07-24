@@ -49,8 +49,11 @@ def starting(message):
 def replying(message):
     main_list = message.text.split()
     the_id = int(main_list[1])
-    bot.reply_to(message, f"send your reply to {the_id}")
-    bot.register_next_step_handler(message, lambda msg: sending_message(msg , the_id))
+    if message.from_user.id == 5892994739:
+      bot.reply_to(message, f"send your reply to {the_id}")
+      bot.register_next_step_handler(message, lambda msg: sending_message(msg , the_id))
+    else:
+        bot.send_message(message.from_user.id, "<b>Only admin has the privilege of sending reply</b>", parse_mode="HTML")
 
 
 def sending_message(message, the_id):
