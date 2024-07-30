@@ -3,7 +3,6 @@ import random
 import telebot
 import time
 import re
-from quote import quote
 from telebot.util import quick_markup
 from dotenv import load_dotenv
 load_dotenv()
@@ -35,8 +34,7 @@ def starting(message):
         elif message.from_user.id == 5892994739:
             bot.send_message(admin_id, "welcome admin")
         else:
-            bot.send_message(message.from_user.id, f"<b>Welcome <a href='tg://user?id={message.from_user.id}'>{message.from_user.first_name}</a>\n"
-                                                   f"Please send your message </b>", parse_mode="HTML")
+            bot.send_message(message.from_user.id, f"<b>Welcome <a href='tg://user?id={message.from_user.id}'>{message.from_user.first_name}</a></b>", parse_mode="HTML")
         if message.text == "/link":
             markup = quick_markup({
                 '🐈‍⬛': {
@@ -51,12 +49,12 @@ def replying(message):
     the_id = int(main_list[1])
     if message.from_user.id == 5892994739:
       bot.reply_to(message, f"send your reply to {the_id}")
-      bot.register_next_step_handler(message, lambda msg: sending_message(msg , the_id))
+      bot.register_next_step_handler(message, lambda msg : sending_reply(msg , the_id))
     else:
         bot.send_message(message.from_user.id, "<b>Only admin has the privilege of sending reply</b>", parse_mode="HTML")
 
 
-def sending_message(message, the_id):
+def sending_reply(message, the_id):
     try:
         bot.send_message(the_id, "<b><i>You have a new message from admin :</i></b>", parse_mode="HTML")
         bot.copy_message(the_id, message.from_user.id, message.id)
@@ -134,39 +132,21 @@ def send_song_list(message):
         bot.send_message(admin_id, f"There has been a problem in getting the song list : {e}")
 
 
-@bot.message_handler(commands=["quote"])
-def send_quote(message):
-    message_list = message.text.split()
-    print(message_list)
-    authors_list = ["George Orwell", "Fyodor Dostoevsky", "Franz Kafka", "Albert Camus",
-                    "Leo Tolstoy", "Mark Twain", "Steve Toltz", "Charles Dickens", "William Shakespeare",
-                    "Dante Alighieri", "Marcus Aurelius", "Albert Camus", "Franz kafka", "Friedrich Nietzsche"]
-    markup = quick_markup({
-        'Have a great reading.': {'url': 'https://t.me/thetouyas'}
-    }, row_width=1)
-    random_author = random.randint(0,13)
-    bot.reply_to(message, "This might take longer than usual.")
+@bot.message_handler(commands=["msg"])
+def intro(message):
     try:
-        if len(message_list) == 1:
-            random_number = random.randint(0, 19)
-            random_quote = quote(search=authors_list[random_author])
-            bot.send_message(message.from_user.id, f"<b>{random_quote[random_number].get("quote")}</b>\n<i>{random_quote[random_number].get("author")}\n{random_quote[random_number].get("book")}</i>", parse_mode="HTML", reply_markup=markup)
-        elif len(message_list) > 1:
-            message_list.pop(0)
-            text = ' '.join(message_list)
-            random_quotes = quote(search=text)
-            length = len(random_quotes)
-            random_number = random.randint(0, length)
-            bot.send_message(message.from_user.id, f"<b>{random_quotes[random_number].get("quote")}</b>\n<i>{random_quotes[random_number].get("author")}\n{random_quotes[random_number].get("book")}</i>", parse_mode="HTML", reply_markup=markup)
-
-    except Exception as e:
-        bot.send_message(admin_id, f"There has been a problem in quoting : {e}")
-        bot.send_message(message.from_user.id, "Oops, there has been a problem, try again.")
-
-
-@bot.message_handler(content_types=["text", "sticker", "location", "photo", "audio","animation","video","contact","document","voice","venue","dice","video_note"])
-def send_message(message):
-    creepy_names = ["-","-", ".", "..", "--", ",", "*", "!", "@", "#", "$", "%", "^", "&"]
+        if message.from_user.id == 5892994739:
+            bot.send_message(admin_id, "Hello, admin")
+        if message.from_user.id not in blocked_users:
+            bot.send_message(message.from_user.id , f"<b>Hello <a href='tg://user?id={message.from_user.id}'>{message.from_user.first_name}</a>\nSend your message to Admin</b>", parse_mode="HTML")
+            bot.register_next_step_handler(message, sending_message)
+        if message.from_user.id in blocked_users:
+            bot.send_message(message.from_user.id, "<b>Oops it looks like you have been blocked</b>", parse_mode="HTML")
+    except Exception as e :
+        bot.reply_to(message, "There has been some error try again later")
+        bot.send_message(admin_id, f"Error in sending message by /msg : {e}")
+def sending_message(message):
+    creepy_names = ["-", "-", ".", "..", "--", ",", "*", "!", "@", "#", "$", "%", "^", "&"]
     user_id = message.from_user.id
     user_info = bot.get_chat(user_id)
     name = user_info.first_name
@@ -174,7 +154,6 @@ def send_message(message):
     bio = user_info.bio
     pfp = user_info.photo
     main_list = [bio, pfp, user_name]
-
     def getting_msg(message):
         bio = bot.get_chat(message.from_user.id).bio
         try:
@@ -208,7 +187,13 @@ def send_message(message):
             'block': {'switch_inline_query_current_chat': f'/block {message.from_user.id}'}
         }, row_width=2)
         bot.reply_to(message, "Sorry you look unknown (╯•﹏•╰)\nMaybe set a username or put pfp to send a message")
-        bot.send_message(admin_id, f"a user with no clear identity tried messaging you.\nname: {message.from_user.first_name}\nid: {message.from_user.id}", reply_markup=markup)
+        bot.send_message(admin_id,
+                         f"a user with no clear identity tried messaging you.\nname: {message.from_user.first_name}\nid: {message.from_user.id}",
+                         reply_markup=markup)
 
+
+@bot.message_handler(func=lambda m : True)
+def echo_all(message):
+    bot.reply_to(message, "Sorry I did not understand what you said.\nIf you want to send a message, use the command /msg.")
 
 bot.infinity_polling()
