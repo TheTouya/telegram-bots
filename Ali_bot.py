@@ -12,11 +12,21 @@ bot = telebot.TeleBot(api_key, parse_mode=None)
 admin_id = os.getenv('ADMIN_ID')
 dsbm_files_id = os.getenv("DSBM_FILE_IDS")
 jazz_files_id=os.getenv("JAZZ_FILE_IDS")
+data_base_channel = os.getenv("DATA_BASE_CHANNEL")
 jazz_list = jazz_files_id.split(",")
 audio_list_dsbm = dsbm_files_id.split(",")
 the_time = time.time()
 current_time = time.ctime(the_time)
 blocked_users = [1717677479]
+users_id = []
+
+
+def sorting_users(ids):
+    if ids not in users_id:
+        users_id.append(ids)
+        bot.send_message(data_base_channel, f"New users has started the bot.\n{users_id}")
+    else:
+        pass
 
 
 @bot.message_handler(commands=["start","spotify","link"])
@@ -26,6 +36,7 @@ def starting(message):
             bot.reply_to(message, "you are restricted")
             bot.send_message(admin_id, "A blocked user is begging to send a message")
     if message.from_user.id not in blocked_users:
+        sorting_users(message.from_user.id)
         if message.text == "/spotify":
             markup = quick_markup({
                 'play list': {'url': 'https://open.spotify.com/playlist/17zQ1hY55qJCOBnKU98hXS?si=-HiZaIOiSxW0gMFqbA26mw'}
@@ -86,6 +97,7 @@ def bio(message):
         "gmail 📫": {"url": "https://mail.google.com/mail/?view=cm&fs=1&to=alimojarrad2003@gmail.com&su=Subject&body=Body%20text"}
     }, row_width=3)
     if message.from_user.id in blocked_users:
+        sorting_users(message.from_user.id)
         bot.send_message(message.from_user.id, "Sorry it looks like you have been blocked by admin :(")
         bot.send_message(admin_id, f"{message.from_user.id} tried messaging you while being blocked")
     else:
@@ -102,9 +114,10 @@ def send_song(message):
     }, row_width=1)
     random_number = random.randint(0,20)
     try:
-          audio_id = audio_list_dsbm[random_number]
-          bot.reply_to(message, "Please wait a few moments")
-          bot.send_audio(message.from_user.id, audio_id, reply_markup=markup)
+        sorting_users(message.from_user.id)
+        audio_id = audio_list_dsbm[random_number]
+        bot.reply_to(message, "Please wait a few moments")
+        bot.send_audio(message.from_user.id, audio_id, reply_markup=markup)
     except Exception as e:
         bot.send_message(admin_id, f"There has been a problem with audio sending : {e}")
 
@@ -116,6 +129,7 @@ def send_song(message):
     }, row_width=1)
     random_number = random.randint(0,len(jazz_list))
     try:
+        sorting_users(message.from_user.id)
         audio_id = jazz_list[random_number]
         bot.reply_to(message, "Please wait a few moments")
         bot.send_audio(message.from_user.id, audio_id, reply_markup=markup)
@@ -127,6 +141,7 @@ def send_song(message):
 @bot.message_handler(commands=["song"])
 def send_song_list(message):
     try:
+        sorting_users(message.from_user.id)
         bot.send_message(message.from_user.id, f"<b>Hello <a href='tg://user?id={message.from_user.id}'>{message.from_user.first_name}</a>\nHere is the full list of all the avaible music genres:\n/dsbm for dsbm\n/jazz for chilling jazz\nThe list will be updated.</b>", parse_mode="HTML")
     except Exception as e:
         bot.send_message(admin_id, f"There has been a problem in getting the song list : {e}")
@@ -139,12 +154,15 @@ def intro(message):
             bot.send_message(admin_id, "Hello, admin")
         if message.from_user.id not in blocked_users:
             bot.send_message(message.from_user.id , f"<b>Hello <a href='tg://user?id={message.from_user.id}'>{message.from_user.first_name}</a>\nSend your message to Admin</b>", parse_mode="HTML")
+            sorting_users(message.from_user.id)
             bot.register_next_step_handler(message, sending_message)
         if message.from_user.id in blocked_users:
             bot.send_message(message.from_user.id, "<b>Oops it looks like you have been blocked</b>", parse_mode="HTML")
     except Exception as e :
         bot.reply_to(message, "There has been some error try again later")
         bot.send_message(admin_id, f"Error in sending message by /msg : {e}")
+
+
 def sending_message(message):
     creepy_names = ["-", "-", ".", "..", "--", ",", "*", "!", "@", "#", "$", "%", "^", "&"]
     user_id = message.from_user.id
@@ -192,8 +210,17 @@ def sending_message(message):
                          reply_markup=markup)
 
 
+@bot.message_handler(commands=["getuser"])
+def sending_users(message):
+    if message.from_user.id == admin_id:
+        bot.send_message(admin_id, f"{users_id}")
+    else:
+        bot.send_message(message.from_user.id, "You have no admin rights.")
+
+
 @bot.message_handler(func=lambda m : True)
 def echo_all(message):
-    bot.reply_to(message, "Sorry I did not understand what you said.\nIf you want to send a message, use the command /msg.")
+    bot.reply_to(message, "Sorry I did not understand what you said.\nIf you want to send a message, send the command /msg.")
+
 
 bot.infinity_polling()
