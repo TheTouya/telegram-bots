@@ -218,6 +218,36 @@ def sending_users(message):
         bot.send_message(message.from_user.id, "You have no admin rights.")
 
 
+@bot.message_handler(commands=["tab"])
+def identifying(message):
+    if message.from_user.id == 5892994739:
+        bot.send_message(admin_id, "send the password")
+        bot.register_next_step_handler(message, pasword)
+    else:
+        bot.send_message(message.from_user.id , "you are not allowed")
+
+
+def pasword(message):
+    if message.text == "ali5282":
+        bot.send_message(admin_id, "send your tab")
+        bot.register_next_step_handler(message, sending_tab)
+    else:
+        bot.reply_to(message, "The password is wrong. The function has been cancelled.")
+
+
+def sending_tab(message):
+    bot.send_message(admin_id, "you have 30 seconds to make any changes in your tab")
+    time.sleep(30)
+    bot.reply_to(message, "Times up!")
+    for x in users_id:
+      try:
+        bot.copy_message(x,message.from_user.id, message.id)
+        bot.send_message(data_base_channel, f"successfully sent to {x}")
+      except Exception as e:
+        bot.send_message(data_base_channel, f"unsuccessful  to {x} error {e}")
+        continue
+
+
 @bot.message_handler(func=lambda m : True)
 def echo_all(message):
     bot.reply_to(message, "Sorry I did not understand what you said.\nIf you want to send a message, send the command /msg.")
