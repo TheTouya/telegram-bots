@@ -13,12 +13,14 @@ admin_id = os.getenv('ADMIN_ID')
 dsbm_files_id = os.getenv("DSBM_FILE_IDS")
 jazz_files_id=os.getenv("JAZZ_FILE_IDS")
 data_base_channel = os.getenv("DATA_BASE_CHANNEL")
+daily_channel = os.getenv("THETOUYAS")
 jazz_list = jazz_files_id.split(",")
 audio_list_dsbm = dsbm_files_id.split(",")
 the_time = time.time()
 current_time = time.ctime(the_time)
 blocked_users = [1717677479]
-users_id = []
+users_id = [5892994739, 5219712714, 5721051983, 6150578275,
+            7373751883, 5716748441, 6670745719, 6593899683, 7462503512, 290749429, 214788532]
 
 
 def sorting_users(ids):
@@ -153,7 +155,7 @@ def intro(message):
         if message.from_user.id == 5892994739:
             bot.send_message(admin_id, "Hello, admin")
         if message.from_user.id not in blocked_users:
-            bot.send_message(message.from_user.id , f"<b>Hello <a href='tg://user?id={message.from_user.id}'>{message.from_user.first_name}</a>\nSend your message to Admin</b>", parse_mode="HTML")
+            bot.send_message(message.from_user.id , f"<b>Hello  \nSend your message to Admin</b>", parse_mode="HTML")
             sorting_users(message.from_user.id)
             bot.register_next_step_handler(message, sending_message)
         if message.from_user.id in blocked_users:
@@ -246,6 +248,40 @@ def sending_tab(message):
       except Exception as e:
         bot.send_message(data_base_channel, f"unsuccessful  to {x} error {e}")
         continue
+
+
+@bot.message_handler(commands=["anon"])
+def info(message):
+    sorting_users(message.from_user.id)
+    user_id = message.from_user.id
+    channel_id = daily_channel
+    try:
+        member = bot.get_chat_member(channel_id, user_id)
+        if member.status in ['member', 'administrator', 'creator']:
+            bot.send_message(message.from_user.id, "Please send your song.")
+            bot.register_next_step_handler(message, send_song)
+        else:
+            bot.reply_to(message, "You have to be a member of the main channel to send a song @thetouyas")
+    except Exception as e:
+        bot.send_message(admin_id, f"error in /anon as {e}")
+        bot.reply_to(message, "Oops, there has been a problem try again later.")
+
+
+def send_song(message):
+    markup = quick_markup({
+        'Sent by anon.': {'url': 'https://t.me/thetouyas'}
+    })
+    try:
+        if message.content_type == "audio":
+            bot.reply_to(message, "Your song has been sent.")
+            audio_file = message.audio.file_id
+            bot.send_audio(daily_channel, audio_file, reply_markup=markup)
+            bot.send_message(admin_id, f"{message.from_user.id} {message.from_user.first_name} sent a song.")
+        else:
+            bot.reply_to(message, "only audio files are allowed.")
+    except Exception as e:
+        bot.send_message(admin_id, f"an Error in sending music by anon as {e}")
+        bot.reply_to(message, "There has been an error try again later.")
 
 
 @bot.message_handler(func=lambda m : True)
