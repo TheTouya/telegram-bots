@@ -19,8 +19,7 @@ audio_list_dsbm = dsbm_files_id.split(",")
 the_time = time.time()
 current_time = time.ctime(the_time)
 blocked_users = [1717677479]
-users_id = [5892994739, 5219712714, 5721051983, 6150578275,
-            7373751883, 5716748441, 6670745719, 6593899683, 7462503512, 290749429, 214788532]
+users_id = []
 
 
 def sorting_users(ids):
@@ -80,9 +79,10 @@ def sending_reply(message, the_id):
 def block_user(message):
     id_user = re.search(r"\d{6,}",message.text)
     try:
+      markup = quick_markup( {'unblock': {'switch_inline_query_current_chat': f'/unblock {id_user.group()}'}})
       if message.from_user.id == 5892994739:
         blocked_users.append(int(id_user.group()))
-        bot.reply_to(message, "this user has been blocked")
+        bot.send_message(admin_id, f"The user {id_user.group()} has been blocked", reply_markup=markup)
         bot.forward_message(admin_id,message.from_user.id,message.id)
         print(blocked_users)
       else:
@@ -103,7 +103,8 @@ def bio(message):
         bot.send_message(message.from_user.id, "Sorry it looks like you have been blocked by admin :(")
         bot.send_message(admin_id, f"{message.from_user.id} tried messaging you while being blocked")
     else:
-      bot.send_message(message.from_user.id, f"<b>Hello <a href='tg://user?id={message.from_user.id}'>{message.from_user.first_name}</a>.\n"
+      bot.send_message(message.from_user.id, f"<b>Hello <a href='tg://user?id="
+                                             f"{message.from_user.id}'>{message.from_user.first_name}</a>.\n"
                                            f"Thank you so much for using this bot.\n"
                                            f"If you want more contact @niyeznayu.</b>", parse_mode="HTML")
       bot.send_message(message.from_user.id, f"<b>Here are all of my socials.</b>", parse_mode="HTML", reply_markup=markup)
@@ -154,7 +155,7 @@ def intro(message):
     try:
         if message.from_user.id == 5892994739:
             bot.send_message(admin_id, "Hello, admin")
-        if message.from_user.id not in blocked_users:
+        elif message.from_user.id not in blocked_users:
             bot.send_message(message.from_user.id , f"<b>Hello  \nSend your message to Admin</b>", parse_mode="HTML")
             sorting_users(message.from_user.id)
             bot.register_next_step_handler(message, sending_message)
@@ -187,14 +188,17 @@ def sending_message(message):
                 else:
                     bot.send_message(admin_id,
                                      f"<i><b>A message from '{message.from_user.id}' \n\nWith username: "
-                                     f"'@{message.from_user.username}'\n\nbio: '{bio}'\n\nWith first name: '{message.from_user.first_name}' \n\n{current_time}</b></i>",
+                                     f"'@{message.from_user.username}'\n\nbio: "
+                                     f"'{bio}'\n\nWith first name: "
+                                     f"'{message.from_user.first_name}' \n\n{current_time}</b></i>",
                                      parse_mode="HTML")
                     bot.copy_message(admin_id, message.from_user.id, message.id)
                     markup = quick_markup({
                         'reply': {'switch_inline_query_current_chat': f'/$ {message.from_user.id}'},
                         'block': {'switch_inline_query_current_chat': f'/block {message.from_user.id}'}
                     }, row_width=2)
-                    bot.send_message(admin_id, f"<i>{message.from_user.id}</i>", reply_markup=markup, parse_mode="HTML")
+                    bot.send_message(admin_id, f"<i>{message.from_user.id}</i>",
+                                     reply_markup=markup, parse_mode="HTML")
                     bot.reply_to(message, "your message has been sent")
         except Exception as e:
             bot.send_message(admin_id, f"There was a problem in getting messages {e}")
@@ -208,14 +212,23 @@ def sending_message(message):
         }, row_width=2)
         bot.reply_to(message, "Sorry you look unknown (╯•﹏•╰)\nMaybe set a username or put pfp to send a message")
         bot.send_message(admin_id,
-                         f"a user with no clear identity tried messaging you.\nname: {message.from_user.first_name}\nid: {message.from_user.id}",
+                         f"a user with no clear identity tried messaging you.\nname: "
+                         f"{message.from_user.first_name}\nid: {message.from_user.id}",
                          reply_markup=markup)
 
 
 @bot.message_handler(commands=["getuser"])
 def sending_users(message):
-    if message.from_user.id == admin_id:
+    if message.from_user.id == 5892994739:
         bot.send_message(admin_id, f"{users_id}")
+    else:
+        bot.send_message(message.from_user.id, "You have no admin rights.")
+
+
+@bot.message_handler(commands=["getblocked"])
+def sending_users(message):
+    if message.from_user.id == 5892994739:
+        bot.send_message(admin_id, f"{blocked_users}")
     else:
         bot.send_message(message.from_user.id, "You have no admin rights.")
 
@@ -284,9 +297,23 @@ def send_song(message):
         bot.reply_to(message, "There has been an error try again later.")
 
 
+@bot.message_handler(commands=['unblock'])
+def unblocking(message):
+    if message.from_user.id == 5892994739:
+        try:
+            txt_list = message.text.split()
+            blocked_users.remove(int(txt_list[1]))
+            bot.send_message(admin_id, f"User {txt_list[1]} is unblocked now")
+        except Exception as e:
+            bot.reply_to(message, f"error in unblocking as {e}")
+    else:
+        bot.send_message(message.from_user.id, "You are not allowed.")
+
+
 @bot.message_handler(func=lambda m : True)
 def echo_all(message):
-    bot.reply_to(message, "Sorry I did not understand what you said.\nIf you want to send a message, send the command /msg.")
+    bot.reply_to(message, "Sorry I did not understand what you said."
+                          "\nIf you want to send a message, send the command /msg.")
 
 
 bot.infinity_polling()
