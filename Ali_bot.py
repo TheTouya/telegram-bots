@@ -58,18 +58,19 @@ def starting(message):
 @bot.message_handler(commands=["$"])
 def replying(message):
     main_list = message.text.split()
-    the_id = int(main_list[1])
+    msg_id = int(main_list[1])
+    the_id = int(main_list[2])
     if message.from_user.id == 5892994739:
       bot.reply_to(message, f"send your reply to {the_id}")
-      bot.register_next_step_handler(message, lambda msg : sending_reply(msg , the_id))
+      bot.register_next_step_handler(message, lambda msg : sending_reply(msg , the_id, msg_id))
     else:
         bot.send_message(message.from_user.id, "<b>Only admin has the privilege of sending reply</b>", parse_mode="HTML")
 
 
-def sending_reply(message, the_id):
+def sending_reply(message, the_id, msg_id):
     try:
         bot.send_message(the_id, "<b><i>You have a new message from admin :</i></b>", parse_mode="HTML")
-        bot.copy_message(the_id, message.from_user.id, message.id)
+        bot.copy_message(the_id, message.from_user.id,  message.id, reply_to_message_id=msg_id)
         bot.send_message(admin_id, f"<i>the reply to {the_id} was successful</i>", parse_mode="HTML")
     except Exception as e:
         bot.send_message(admin_id, f"we got a problem in replying {e}")
@@ -194,7 +195,7 @@ def sending_message(message):
                                      parse_mode="HTML")
                     bot.copy_message(admin_id, message.from_user.id, message.id)
                     markup = quick_markup({
-                        'reply': {'switch_inline_query_current_chat': f'/$ {message.from_user.id}'},
+                        'reply': {'switch_inline_query_current_chat': f'/$ {message.id} {message.from_user.id}'},
                         'block': {'switch_inline_query_current_chat': f'/block {message.from_user.id}'}
                     }, row_width=2)
                     bot.send_message(admin_id, f"<i>{message.from_user.id}</i>",
@@ -310,7 +311,8 @@ def unblocking(message):
         bot.send_message(message.from_user.id, "You are not allowed.")
 
 
-@bot.message_handler(func=lambda m : True)
+@bot.message_handler(content_types=["text", "sticker", "location", "photo", "audio",
+                                    "animation","video","contact","document","voice","venue","dice","video_note"])
 def echo_all(message):
     bot.reply_to(message, "Sorry I did not understand what you said."
                           "\nIf you want to send a message, send the command /msg.")
