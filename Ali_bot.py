@@ -40,7 +40,8 @@ def starting(message):
         sorting_users(message.from_user.id)
         if message.text == "/spotify":
             markup = quick_markup({
-                'play list': {'url': 'https://open.spotify.com/playlist/17zQ1hY55qJCOBnKU98hXS?si=-HiZaIOiSxW0gMFqbA26mw'}
+                'play list': {'url': 'https://open.spotify.com'
+                                     '/playlist/17zQ1hY55qJCOBnKU98hXS?si=-HiZaIOiSxW0gMFqbA26mw'}
             }, row_width=2)
             bot.send_message(message.from_user.id, "<b>Here is my playlist</b>", reply_markup=markup, parse_mode="HTML")
         elif message.from_user.id == 5892994739:
@@ -68,12 +69,15 @@ def replying(message):
 
 
 def sending_reply(message, the_id, msg_id):
-    try:
-        bot.send_message(the_id, "<b><i>You have a new message from admin :</i></b>", parse_mode="HTML")
-        bot.copy_message(the_id, message.from_user.id,  message.id, reply_to_message_id=msg_id)
-        bot.send_message(admin_id, f"<i>the reply to {the_id} was successful</i>", parse_mode="HTML")
-    except Exception as e:
-        bot.send_message(admin_id, f"we got a problem in replying {e}")
+    if message.text == "cancel":
+        bot.reply_to(message, "Replying has been cancelled.")
+    else:
+        try:
+            bot.send_message(the_id, "<b><i>You have a new message from admin :</i></b>", parse_mode="HTML")
+            bot.copy_message(the_id, message.from_user.id, message.id, reply_to_message_id=msg_id)
+            bot.send_message(admin_id, f"<i>the reply to {the_id} was successful</i>", parse_mode="HTML")
+        except Exception as e:
+            bot.send_message(admin_id, f"we got a problem in replying {e}")
 
 
 @bot.message_handler(commands=["block"])
@@ -97,7 +101,8 @@ def bio(message):
     markup = quick_markup({
         'insta 📽️': {"url": "https://www.instagram.com/thetouyas?igsh=dDFibTlqbjB2c2N2"},
         "github 📟": {"url": "https://github.com/TheTouya"},
-        "gmail 📫": {"url": "https://mail.google.com/mail/?view=cm&fs=1&to=alimojarrad2003@gmail.com&su=Subject&body=Body%20text"}
+        "gmail 📫": {"url": "https://mail.google.com/mail/?v"
+                           "iew=cm&fs=1&to=alimojarrad2003@gmail.com&su=Subject&body=Body%20text"}
     }, row_width=3)
     if message.from_user.id in blocked_users:
         sorting_users(message.from_user.id)
@@ -197,8 +202,9 @@ def sending_message(message):
                     markup = quick_markup({
                         'reply': {'switch_inline_query_current_chat': f'/$ {message.id} {message.from_user.id}'},
                         'block': {'switch_inline_query_current_chat': f'/block {message.from_user.id}'},
-                        'ban': {'switch_inline_query_current_chat': f'/ban {message.from_user.id}'}
-                    }, row_width=3)
+                        'ban': {'switch_inline_query_current_chat': f'/ban {message.from_user.id}'},
+                        'direct': {'switch_inline_query_current_chat': f'/dir {message.from_user.id}'}
+                    }, row_width=2)
                     bot.send_message(admin_id, f"<i>{message.from_user.id}</i>",
                                      reply_markup=markup, parse_mode="HTML")
                     bot.reply_to(message, "your message has been sent")
@@ -234,7 +240,7 @@ def sending_users(message):
     else:
         bot.send_message(message.from_user.id, "You have no admin rights.")
 
-        
+
 @bot.message_handler(commands=["getbanned"])
 def sending_banned(message):
     try:
@@ -338,6 +344,28 @@ def banning(message):
     else:
         bot.send_message(message.from_user.id, "<b>Only admin has the privilege of banning</b>",
                          parse_mode="HTML")
+
+
+@bot.message_handler(commands=["dir"])
+def direct_msg(message):
+    main_list = message.text.split()
+    the_id = int(main_list[1])
+    if message.from_user.id == 5892994739:
+        bot.send_message(admin_id, "Ready to send your direct message")
+        bot.register_next_step_handler(message, lambda msg : sending_dir(msg , the_id))
+    else:
+        bot.send_message(message.from_user.id, "<b>Only admin has the privilege of sending direct</b>",
+                         parse_mode="HTML")
+def sending_dir(message, the_id):
+    if message.text == "cancel":
+        bot.reply_to(message, "Sending dir has been cancelled.")
+    else:
+        try:
+            bot.send_message(the_id, "<b>You have a new message from admin :</b>", parse_mode="HTML")
+            bot.copy_message(the_id, message.from_user.id, message.id)
+            bot.send_message(admin_id, f"<i>the reply to {the_id} was successful</i>", parse_mode="HTML")
+        except Exception as e:
+            bot.send_message(admin_id, f"we got a problem in replying {e}")
 
 
 @bot.message_handler(content_types=["text", "sticker", "location", "photo", "audio",
