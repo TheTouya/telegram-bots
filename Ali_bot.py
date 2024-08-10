@@ -20,7 +20,7 @@ the_time = time.time()
 current_time = time.ctime(the_time)
 blocked_users = [1717677479]
 users_id = []
-
+banned_users = []
 
 def sorting_users(ids):
     if ids not in users_id:
@@ -196,8 +196,9 @@ def sending_message(message):
                     bot.copy_message(admin_id, message.from_user.id, message.id)
                     markup = quick_markup({
                         'reply': {'switch_inline_query_current_chat': f'/$ {message.id} {message.from_user.id}'},
-                        'block': {'switch_inline_query_current_chat': f'/block {message.from_user.id}'}
-                    }, row_width=2)
+                        'block': {'switch_inline_query_current_chat': f'/block {message.from_user.id}'},
+                        'ban': {'switch_inline_query_current_chat': f'/ban {message.from_user.id}'}
+                    }, row_width=3)
                     bot.send_message(admin_id, f"<i>{message.from_user.id}</i>",
                                      reply_markup=markup, parse_mode="HTML")
                     bot.reply_to(message, "your message has been sent")
@@ -232,6 +233,14 @@ def sending_users(message):
         bot.send_message(admin_id, f"{blocked_users}")
     else:
         bot.send_message(message.from_user.id, "You have no admin rights.")
+
+        
+@bot.message_handler(commands=["getbanned"])
+def sending_banned(message):
+    try:
+        bot.send_message(admin_id, f"{banned_users}")
+    except Exception as e:
+        bot.reply_to(message, f"error as {e}")
 
 
 @bot.message_handler(commands=["tab"])
@@ -309,6 +318,26 @@ def unblocking(message):
             bot.reply_to(message, f"error in unblocking as {e}")
     else:
         bot.send_message(message.from_user.id, "You are not allowed.")
+
+
+@bot.message_handler(commands=["ban"])
+def banning(message):
+    if message.from_user.id == 5892994739:
+        try:
+            args = message.text.split()
+            if len(args) > 1:
+                userID = int(args[1])
+                bot.ban_chat_member(daily_channel, userID)
+                bot.reply_to(message, f"{userID} has been banned from @thetouyas")
+                banned_users.append(userID)
+                bot.send_message(data_base_channel, f"New user has been banned from daily channel {userID}")
+            else:
+                bot.reply_to(message, "Not valid arguments")
+        except Exception as e:
+            bot.send_message(admin_id, f"Error occurred in banning {e}")
+    else:
+        bot.send_message(message.from_user.id, "<b>Only admin has the privilege of banning</b>",
+                         parse_mode="HTML")
 
 
 @bot.message_handler(content_types=["text", "sticker", "location", "photo", "audio",
