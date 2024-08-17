@@ -189,7 +189,6 @@ def sending_message(message):
                     bot.reply_to(message, "It looks like you have been blocked by the Admin :(")
                     bot.send_message(admin_id, f"{message.from_user.id} tried messaging you while being blocked")
             if message.from_user.id not in blocked_users:
-                
                 if message.from_user.id == 5892994739:
                     bot.send_message(admin_id, "<b>Hello Admin</b>", parse_mode="HTML")
                 else:
@@ -207,8 +206,6 @@ def sending_message(message):
                         'direct': {'switch_inline_query_current_chat': f'/dir {message.from_user.id}'}
                     }, row_width=2)
                     bot.copy_message(admin_id, message.from_user.id, message.id, reply_markup=markup)
-                    # bot.send_message(admin_id, f"<i>{message.from_user.id}</i>",
-                    #                  reply_markup=markup, parse_mode="HTML")
                     bot.reply_to(message, "your message has been sent")
                     
         except Exception as e:
