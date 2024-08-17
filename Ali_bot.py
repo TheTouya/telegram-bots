@@ -21,7 +21,7 @@ current_time = time.ctime(the_time)
 blocked_users = [1717677479]
 users_id = []
 banned_users = []
-
+user_stat = {}
 def sorting_users(ids):
     if ids not in users_id:
         users_id.append(ids)
@@ -189,37 +189,39 @@ def sending_message(message):
                     bot.reply_to(message, "It looks like you have been blocked by the Admin :(")
                     bot.send_message(admin_id, f"{message.from_user.id} tried messaging you while being blocked")
             if message.from_user.id not in blocked_users:
+                
                 if message.from_user.id == 5892994739:
                     bot.send_message(admin_id, "<b>Hello Admin</b>", parse_mode="HTML")
                 else:
+                    user_stat.update({message.id: message.from_user.id})
                     bot.send_message(admin_id,
                                      f"<i><b>A message from '{message.from_user.id}' \n\nWith username: "
                                      f"'@{message.from_user.username}'\n\nbio: "
                                      f"'{bio}'\n\nWith first name: "
                                      f"'{message.from_user.first_name}' \n\n{current_time}</b></i>",
                                      parse_mode="HTML")
-                    bot.copy_message(admin_id, message.from_user.id, message.id)
                     markup = quick_markup({
                         'reply': {'callback_data': 'reply'},
                         'block': {'callback_data': f'block'},
                         'ban': {'switch_inline_query_current_chat': f'/ban {message.from_user.id}'},
                         'direct': {'switch_inline_query_current_chat': f'/dir {message.from_user.id}'}
                     }, row_width=2)
-                    bot.send_message(admin_id, f"<i>{message.from_user.id}</i>",
-                                     reply_markup=markup, parse_mode="HTML")
+                    bot.copy_message(admin_id, message.from_user.id, message.id, reply_markup=markup)
+                    # bot.send_message(admin_id, f"<i>{message.from_user.id}</i>",
+                    #                  reply_markup=markup, parse_mode="HTML")
                     bot.reply_to(message, "your message has been sent")
-                    bot.user_data = {"user_id": message.from_user.id, "msg_id": message.id}
+                    
         except Exception as e:
             bot.send_message(admin_id, f"There was a problem in getting messages {e}")
             bot.send_message(message.from_user.id, "Oops there has been an error try again later")
     if name not in creepy_names or any(main_list):
         getting_msg(message)
     else:
+        user_stat.update({message.id: message.from_user.id})
         markup = quick_markup({
             'reply': {'callback_data': f'reply'},
             'block': {'callback_data': f'block'}
         }, row_width=2)
-        bot.user_data = {"user_id": message.from_user.id, "msg_id": message.id}
         bot.reply_to(message, "Sorry you look unknown (╯•﹏•╰)\nMaybe set a username or put pfp to send a message")
         bot.send_message(admin_id,
                          f"a user with no clear identity tried messaging you.\nname: "
@@ -373,22 +375,21 @@ def sending_dir(message, the_id):
 @bot.callback_query_handler(func=lambda call: call.data == "reply")
 def reply_register(call):
     try:
+        msg_id = call.message.id - 2
+        print(msg_id)
         bot.send_message(admin_id, "<b> Please send your reply</b>", parse_mode="HTML")
-        bot.register_next_step_handler(call.message, process_reply)
+        bot.register_next_step_handler(call.message, lambda msg: process_user_reply(msg, msg_id))
     except Exception as e:
         bot.send_message(admin_id, f"An error occurred in callback data as {e}")
-def process_reply(message):
-    user_id = bot.user_data.get("user_id")
-    msg_id = bot.user_data.get("msg_id")
-    markup = quick_markup({"reply": {"callback_data": "replyAdmin"}}, row_width=1)
-    bot.user_data = {"admin": message.id}
+def process_user_reply(message, msg_id):
     try:
-        if user_id and msg_id:
-            bot.send_message(user_id, "<b>You have a new message from admin</b>", parse_mode="HTML")
-            bot.copy_message(user_id, message.from_user.id, message.id, reply_to_message_id=msg_id, reply_markup=markup)
-            bot.reply_to(message, "Your reply has been sent.")
+        user_id = user_stat.get(msg_id)
+        bot.send_message(user_id, f"<b>You have a reply from admin</b>", parse_mode="HTML")
+        bot.copy_message(user_id, message.from_user.id, message.id, reply_to_message_id=msg_id)
+        bot.reply_to(message, "Reply has been sent.")
     except Exception as e:
-        bot.send_message(admin_id, "error in proccess reply as {e}")
+        bot.send_message(admin_id, f"Error in replying as {e}")
+    
 
 
 @bot.callback_query_handler(func=lambda call: call.data == "replyAdmin")
@@ -432,12 +433,15 @@ def admin_replier(message):
 
 @bot.callback_query_handler(func=lambda call: call.data == "block")
 def blocking(call):
-    user_id = bot.user_data.get("user_id")
     try:
-        if user_id:
-            markup = quick_markup( {'unblock': {'switch_inline_query_current_chat': f'/unblock {user_id}'}})
+        msg_id = call.message.id - 2
+        user_id = user_stat.get(msg_id)
+        if user_id not in blocked_users:
             blocked_users.append(int(user_id))
+            markup = quick_markup( {'unblock': {'switch_inline_query_current_chat': f'/unblock {user_id}'}})
             bot.send_message(admin_id, f"<b>{user_id} has been blocked</b>", parse_mode="HTML", reply_markup=markup)
+        elif user_id in blocked_users:
+            bot.send_message(admin_id, f"the user {user_id} has already been blocked.")
     except Exception as e:
         bot.send_message(admin_id, f"error in blocking {e}")
 
