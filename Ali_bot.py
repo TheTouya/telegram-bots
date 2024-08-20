@@ -452,7 +452,7 @@ def checking(call):
         member = bot.get_chat_member(channel_id, user)
         if member.status in ['member', 'administrator', 'creator']:
             bot.delete_message(user, msg_id)
-            bot.send_message(user, "</b>Welcome, now send the song : </b>", parse_mode="HTML")
+            bot.send_message(user, "<b>Welcome, now send the song : </b>", parse_mode="HTML")
             bot.register_next_step_handler(call.message, reply_song)
         else:
             bot.send_message(user, "You didn't join yet. Please try again.")
