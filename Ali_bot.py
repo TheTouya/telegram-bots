@@ -159,10 +159,13 @@ def send_song_list(message):
 @bot.message_handler(commands=["msg"])
 def intro(message):
     try:
+        markup = quick_markup({
+            "cancel🚫": {"callback_data": "cancel"}
+        }, row_width=1)
         if message.from_user.id == 5892994739:
             bot.send_message(admin_id, "Hello, admin")
         elif message.from_user.id not in blocked_users:
-            bot.send_message(message.from_user.id , f"<b>Hello  \nSend your message to Admin</b>", parse_mode="HTML")
+            bot.send_message(message.from_user.id , "<b>Hello\nSend your message to Admin\nSend <code>cancel</code> to cancel sending.</b>", parse_mode="HTML")
             sorting_users(message.from_user.id)
             bot.register_next_step_handler(message, sending_message)
         if message.from_user.id in blocked_users:
@@ -212,7 +215,10 @@ def sending_message(message):
             bot.send_message(admin_id, f"There was a problem in getting messages {e}")
             bot.send_message(message.from_user.id, "Oops there has been an error try again later")
     if name not in creepy_names or any(main_list):
-        getting_msg(message)
+        if message.text == "cancel":
+         bot.reply_to(message, "The operation was cancelled.")
+        else:
+         getting_msg(message)
     else:
         user_stat.update({message.id: message.from_user.id})
         markup = quick_markup({
@@ -473,6 +479,18 @@ def reply_song(message):
     except Exception as e:
         bot.send_message(admin_id, f"an Error in sending music by anon as {e}")
         bot.reply_to(message, "There has been an error try again later.")
+
+
+@bot.callback_query_handler(func=lambda call:call.data == "cancel")
+def canceling(call):
+    try:
+        user = call.from_user.id
+        msg_id = call.message.id
+        bot.send_message(user, "<b>The operation was cancelled</b>", parse_mode="HTML")
+        bot.delete_message(user, msg_id)
+    except Exception as e :
+        bot.send_message(admin_id, f"Error is cancelling replies as {e}")
+
 
 @bot.message_handler(content_types=["text", "sticker", "location", "photo", "audio",
                                     "animation","video","contact","document","voice","venue","dice","video_note"])
