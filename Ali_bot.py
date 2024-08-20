@@ -291,7 +291,9 @@ def info(message):
             bot.send_message(message.from_user.id, "Please send your song.")
             bot.register_next_step_handler(message, send_song)
         else:
-            bot.reply_to(message, "You have to be a member of the main channel to send a song @thetouyas")
+            markup = quick_markup({"click here to check.☑️": {"callback_data": "join"}}, row_width=1)
+            bot.send_message(user_id, f"Dear {message.from_user.first_name}, "
+                                      f"in order to send a song you have to be a member of this channel @thetouyas", reply_markup=markup)
     except Exception as e:
         bot.send_message(admin_id, f"error in /anon as {e}")
         bot.reply_to(message, "Oops, there has been a problem try again later.")
@@ -388,7 +390,6 @@ def process_user_reply(message, msg_id):
         bot.send_message(admin_id, f"Error in replying as {e}")
     
 
-
 @bot.callback_query_handler(func=lambda call: call.data == "replyAdmin")
 def send_reply_admin(call):
     try:
@@ -426,7 +427,6 @@ def admin_replier(message):
         bot.reply_to(message, "Oops there has been a problem please try again later or use /msg")
         bot.send_message(admin_id, "Error in client to admin reply as {e}")
 
-       
 
 @bot.callback_query_handler(func=lambda call: call.data == "block")
 def blocking(call):
@@ -441,6 +441,38 @@ def blocking(call):
             bot.send_message(admin_id, f"the user {user_id} has already been blocked.")
     except Exception as e:
         bot.send_message(admin_id, f"error in blocking {e}")
+
+
+@bot.callback_query_handler(func=lambda call: call.data == "join")
+def checking(call):
+    user = call.from_user.id
+    channel_id = daily_channel
+    msg_id = call.message.id
+    try:
+        member = bot.get_chat_member(channel_id, user)
+        if member.status in ['member', 'administrator', 'creator']:
+            bot.delete_message(user, msg_id)
+            bot.send_message(user, "</b>Welcome, now send the song : </b>", parse_mode="HTML")
+            bot.register_next_step_handler(call.message, reply_song)
+        else:
+            bot.send_message(user, "You didn't join yet. Please try again.")
+    except Exception as e:
+        bot.send_message(admin_id, f"Error in callback data join {e}")
+def reply_song(message):
+    markup = quick_markup({
+        'Sent by anon.': {'url': 'https://t.me/thetouyas'}
+    })
+    try:
+        if message.content_type == "audio":
+            bot.reply_to(message, "Your song has been sent.")
+            audio_file = message.audio.file_id
+            bot.send_audio(daily_channel, audio_file, reply_markup=markup)
+            bot.send_message(admin_id, f"{message.from_user.id} {message.from_user.first_name} sent a song.")
+        else:
+            bot.reply_to(message, "only audio files are allowed.")
+    except Exception as e:
+        bot.send_message(admin_id, f"an Error in sending music by anon as {e}")
+        bot.reply_to(message, "There has been an error try again later.")
 
 @bot.message_handler(content_types=["text", "sticker", "location", "photo", "audio",
                                     "animation","video","contact","document","voice","venue","dice","video_note"])
