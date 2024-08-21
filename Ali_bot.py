@@ -377,6 +377,23 @@ def sending_dir(message, the_id):
             bot.send_message(admin_id, f"we got a problem in replying {e}")
 
 
+@bot.message_handler(commands=['panel'])
+def showing_panel(message):
+    try:
+        markup = quick_markup({
+            'users': {'callback_data': 'user'},
+            'blocked': {'callback_data': "blocked"},
+            'close': {'callback_data' : 'close'}
+        })
+        total_user = len(users_id)
+        total_blocked = len(blocked_users)
+        if message.from_user.id == 5892994739:
+            bot.send_message(admin_id, f"<b>Hey\nYour bot has a total users of {total_user}.\nYour bot has blocked {total_blocked} users. Bot running on pythonanywhere.com</b>", 
+                             parse_mode="HTML")
+        else:
+            bot.reply_to(message, "fuck off mate")
+    except Exception as e:
+        bot.send_message(admin_id, f"Error in /panel {e}")
 @bot.callback_query_handler(func=lambda call: call.data == "reply")
 def reply_register(call):
     try:
@@ -408,17 +425,8 @@ def send_reply_admin(call):
         bot.send_message(admin_id, f"Problem in to admin reply as {e}")
         bot.send_message(call.from_user.id, "There hass been a problem for the time being user /msg")
 
-
+# working on it
 def admin_replier(message):
-    markup = quick_markup({
-                        'reply': {'callback_data': 'reply'},
-                        'block': {'callback_data': f'block'},
-                        'ban': {'switch_inline_query_current_chat': f'/ban {message.from_user.id}'},
-                        'direct': {'switch_inline_query_current_chat': f'/dir {message.from_user.id}'}
-                    }, row_width=2)
-    msg_id = bot.user_data.get("admin")
-    bot.user_data = {"user_id": message.from_user.id, "msg_id": message.id}
-    
     try:
         markup = quick_markup({
                         'reply': {'callback_data': 'reply'},
@@ -426,7 +434,7 @@ def admin_replier(message):
                         'ban': {'switch_inline_query_current_chat': f'/ban {message.from_user.id}'},
                         'direct': {'switch_inline_query_current_chat': f'/dir {message.from_user.id}'}
                     }, row_width=2)
-        bot.copy_message(admin_id, message.from_user.id, message.id, reply_to_message_id=msg_id, reply_markup=markup)
+        bot.copy_message(admin_id, message.from_user.id, message.id, reply_markup=markup)
         bot.reply_to(message, "Your reply has been sent.")
         bot.user_data = {"user_id": message.from_user.id, "msg_id": message.id}
     except Exception as e:
