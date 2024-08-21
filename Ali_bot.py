@@ -377,23 +377,48 @@ def sending_dir(message, the_id):
             bot.send_message(admin_id, f"we got a problem in replying {e}")
 
 
-@bot.message_handler(commands=['panel'])
+@bot.message_handler(commands=['pannel'])
 def showing_panel(message):
     try:
         markup = quick_markup({
             'users': {'callback_data': 'user'},
-            'blocked': {'callback_data': "blocked"},
+            'blocked': {'callback_data': 'blocked'},
             'close': {'callback_data' : 'close'}
-        })
+        }, row_width=2)
         total_user = len(users_id)
         total_blocked = len(blocked_users)
         if message.from_user.id == 5892994739:
-            bot.send_message(admin_id, f"<b>Hey\nYour bot has a total users of {total_user}.\nYour bot has blocked {total_blocked} users. Bot running on pythonanywhere.com</b>", 
-                             parse_mode="HTML")
+            bot.send_message(admin_id, f"<b>Hey\nYour bot has a total users of {total_user}.\nYour bot has blocked {total_blocked} users.\nBot running on pythonanywhere.com</b>", 
+                             parse_mode="HTML", reply_markup=markup)
         else:
             bot.reply_to(message, "fuck off mate")
     except Exception as e:
-        bot.send_message(admin_id, f"Error in /panel {e}")
+        bot.send_message(admin_id, f"Error in /pannel {e}")
+
+
+@bot.callback_query_handler(func=lambda call:call.data == "user")
+def sending_user(call):
+    try:
+        bot.send_message(data_base_channel, f'total users {users_id}')
+        bot.send_message(admin_id, "<b> required task is done.</b>", parse_mode="HTML")
+    except Exception as e:
+        bot.send_message(admin_id, f"error in sending total users {e}")   
+
+
+@bot.callback_query_handler(func=lambda call:call.data == "blocked")
+def sending_blocked(call):
+    try:
+        bot.send_message(data_base_channel, f'Total blokced users {blocked_users}')
+        bot.send_message(admin_id, "<b>required task is done</b>", parse_mode="HTML")
+    except Exception as e:
+        bot.send_message(admin_id, f"error in sending total blocked as {e}")
+
+@bot.callback_query_handler(func=lambda call:call.data == "close")
+def closing_pannel(call):
+    try:
+        bot.delete_message(admin_id, call.message.id)
+    except Exception as e:
+        bot.send_message(admin_id, f"error in closing pannel {e}")
 @bot.callback_query_handler(func=lambda call: call.data == "reply")
 def reply_register(call):
     try:
