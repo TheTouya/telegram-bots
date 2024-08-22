@@ -196,6 +196,7 @@ def sending_message(message):
                     bot.send_message(admin_id, "<b>Hello Admin</b>", parse_mode="HTML")
                 else:
                     user_stat.update({message.id: message.from_user.id})
+                    bot.send_message(data_base_channel, f"users stats : {user_stat}")
                     bot.send_message(admin_id,
                                      f"<i><b>A message from '{message.from_user.id}' \n\nWith username: "
                                      f"'@{message.from_user.username}'\n\nbio: "
@@ -423,7 +424,6 @@ def closing_pannel(call):
 def reply_register(call):
     try:
         msg_id = call.message.id - 2
-        print(msg_id)
         bot.send_message(admin_id, "<b> Please send your reply</b>", parse_mode="HTML")
         bot.register_next_step_handler(call.message, lambda msg: process_user_reply(msg, msg_id))
     except Exception as e:
