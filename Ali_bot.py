@@ -165,7 +165,7 @@ def intro(message):
         if message.from_user.id == 5892994739:
             bot.send_message(admin_id, "Hello, admin")
         elif message.from_user.id not in blocked_users:
-            bot.send_message(message.from_user.id , "<b>Hello\nSend your message to Admin\nSend <code>cancel</code> to cancel sending.</b>", parse_mode="HTML")
+            bot.send_message(message.from_user.id , "<b>Hello\nSend your message to Admin\nSend /cancel to cancel sending.</b>", parse_mode="HTML")
             sorting_users(message.from_user.id)
             bot.register_next_step_handler(message, sending_message)
         if message.from_user.id in blocked_users:
@@ -215,7 +215,7 @@ def sending_message(message):
             bot.send_message(admin_id, f"There was a problem in getting messages {e}")
             bot.send_message(message.from_user.id, "Oops there has been an error try again later")
     if name not in creepy_names or any(main_list):
-        if message.text == "cancel":
+        if message.text == "/cancel":
          bot.reply_to(message, "The operation was cancelled.")
         else:
          getting_msg(message)
