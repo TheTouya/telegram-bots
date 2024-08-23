@@ -382,15 +382,15 @@ def sending_dir(message, the_id):
 def showing_panel(message):
     try:
         markup = quick_markup({
-            'users': {'callback_data': 'user'},
-            'blocked': {'callback_data': 'blocked'},
-            'close': {'callback_data' : 'close'},
-            'tab': {'callback_data': 'tab'}
+            'users👤': {'callback_data': 'user'},
+            'blocked🚷': {'callback_data': 'blocked'},
+            'close❌': {'callback_data' : 'close'},
+            'tab📊': {'callback_data': 'tab'}
         }, row_width=2)
         total_user = len(users_id)
         total_blocked = len(blocked_users)
         if message.from_user.id == 5892994739:
-            bot.send_message(admin_id, f"<b>Hey\nYour bot has a total users of {total_user}.\nYour bot has blocked {total_blocked} users.\nBot running on pythonanywhere.com</b>", 
+            bot.send_message(admin_id, f"<b>Hey👋\nYour bot has a total users of {total_user}.\nYour bot has blocked {total_blocked} users.\nBot running on pythonanywhere.com</b>", 
                              parse_mode="HTML", reply_markup=markup)
         else:
             bot.reply_to(message, "fuck off mate")
