@@ -261,12 +261,12 @@ def sending_banned(message):
 def identifying(message):
     if message.from_user.id == 5892994739:
         bot.send_message(admin_id, "send the password")
-        bot.register_next_step_handler(message, pasword)
+        bot.register_next_step_handler(message, password)
     else:
         bot.send_message(message.from_user.id , "you are not allowed")
 
 
-def pasword(message):
+def password(message):
     if message.text == "ali5282":
         bot.send_message(admin_id, "send your tab")
         bot.register_next_step_handler(message, sending_tab)
@@ -384,7 +384,8 @@ def showing_panel(message):
         markup = quick_markup({
             'users': {'callback_data': 'user'},
             'blocked': {'callback_data': 'blocked'},
-            'close': {'callback_data' : 'close'}
+            'close': {'callback_data' : 'close'},
+            'tab': {'callback_data': 'tab'}
         }, row_width=2)
         total_user = len(users_id)
         total_blocked = len(blocked_users)
@@ -420,6 +421,37 @@ def closing_pannel(call):
         bot.delete_message(admin_id, call.message.id)
     except Exception as e:
         bot.send_message(admin_id, f"error in closing pannel {e}")
+
+
+@bot.callback_query_handler(func=lambda call:call.data == "tab")
+def getting_password(call):
+    try:
+        if call.from_user.id == 5892994739:
+            bot.send_message(admin_id, f"Please send your password : ")
+            bot.register_next_step_handler(call.message, password_call)
+        else:
+            bot.send_message(call.from_user.id, "You are not allowed.")
+    except Exception as e:
+        bot.send_message(admin_id, f"Error in tab {e}")
+def password_call(message):
+    if message.text == "ali5282":
+        bot.send_message(admin_id, "send your tab")
+        bot.register_next_step_handler(message, sending_tab_call)
+    else:
+        bot.reply_to(message, "The password is wrong. The function has been cancelled.")
+def sending_tab_call(message):
+    bot.send_message(admin_id, "you have 30 seconds to make any changes in your tab")
+    time.sleep(30)
+    bot.reply_to(message, "Times up!")
+    for x in users_id:
+      try:
+        bot.copy_message(x,message.from_user.id, message.id)
+        bot.send_message(data_base_channel, f"successfully sent to {x}")
+      except Exception as e:
+        bot.send_message(data_base_channel, f"unsuccessful  to {x} error {e}")
+        continue
+
+
 @bot.callback_query_handler(func=lambda call: call.data == "reply")
 def reply_register(call):
     try:
