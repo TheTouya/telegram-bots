@@ -32,7 +32,7 @@ def converting_id_to_name():
     name_list = []
     try:
         if len(users_id) == 0:
-            bot.send_message(admin_id, "No user found in the users id list")
+            bot.send_message(admin_id, "<b>No user found in the users id list</b>", parse_mode="HTML")
         elif len(users_id) > 0:
             for x in users_id:
                 try: 
