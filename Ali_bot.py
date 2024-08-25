@@ -28,6 +28,22 @@ def sorting_users(ids):
         bot.send_message(data_base_channel, f"New users has started the bot.\n{users_id}")
     else:
         pass
+def converting_id_to_name():
+    name_list = []
+    try:
+        if len(users_id) == 0:
+            bot.send_message(admin_id, "No user found in the users id list")
+        elif len(users_id) > 0:
+            for x in users_id:
+                try: 
+                   users_info = bot.get_chat(x)
+                   name_list.append(users_info.first_name)
+                except Exception as e:
+                    bot.send_message(admin_id, f"Error in getting users {x} error {e}")
+            bot.send_message(data_base_channel, f"The name of the users : {name_list}")
+            bot.send_message(admin_id, "<b>The request is done.</b>", parse_mode="HTML")
+    except Exception as e :
+        bot.send_message(admin_id, f"error in {e}")
 
 
 @bot.message_handler(commands=["start","spotify","link"])
@@ -385,7 +401,8 @@ def showing_panel(message):
             'users👤': {'callback_data': 'user'},
             'blocked🚷': {'callback_data': 'blocked'},
             'close❌': {'callback_data' : 'close'},
-            'tab📊': {'callback_data': 'tab'}
+            'tab📊': {'callback_data': 'tab'},
+            'names📃': {'callback_data': 'names'}
         }, row_width=2)
         total_user = len(users_id)
         total_blocked = len(blocked_users)
@@ -393,10 +410,18 @@ def showing_panel(message):
             bot.send_message(admin_id, f"<b>Hey👋\nYour bot has a total users of {total_user}.\nYour bot has blocked {total_blocked} users.\nBot running on pythonanywhere.com</b>", 
                              parse_mode="HTML", reply_markup=markup)
         else:
-            bot.reply_to(message, "fuck off mate")
+            bot.reply_to(message, "You are not allowed.")
     except Exception as e:
         bot.send_message(admin_id, f"Error in /pannel {e}")
 
+
+@bot.callback_query_handler(func=lambda call: call.data == "names")
+def sending_name(call):
+    try:
+        bot.send_message(admin_id, "<b>Processing yout request</b>", parse_mode="HTML")
+        converting_id_to_name()
+    except Exception as e:
+        bot.send_message(admin_id, f"There was a problem in the callback {e}")
 
 @bot.callback_query_handler(func=lambda call:call.data == "user")
 def sending_user(call):
