@@ -418,7 +418,7 @@ def showing_panel(message):
 @bot.callback_query_handler(func=lambda call: call.data == "names")
 def sending_name(call):
     try:
-        bot.send_message(admin_id, "<b>Processing yout request</b>", parse_mode="HTML")
+        bot.send_message(admin_id, "<b>Processing your request</b>", parse_mode="HTML")
         converting_id_to_name()
     except Exception as e:
         bot.send_message(admin_id, f"There was a problem in the callback {e}")
