@@ -22,6 +22,7 @@ blocked_users = [1717677479]
 users_id = []
 banned_users = []
 user_stat = {}
+admin_stat = {}
 def sorting_users(ids):
     if ids not in users_id:
         users_id.append(ids)
@@ -291,8 +292,8 @@ def password(message):
 
 
 def sending_tab(message):
-    bot.send_message(admin_id, "you have 30 seconds to make any changes in your tab")
-    time.sleep(30)
+    bot.send_message(admin_id, "you have 60 seconds to make any changes in your tab")
+    time.sleep(60)
     bot.reply_to(message, "Times up!")
     for x in users_id:
       try:
@@ -487,10 +488,15 @@ def reply_register(call):
         bot.send_message(admin_id, f"An error occurred in callback data as {e}")
 def process_user_reply(message, msg_id):
     try:
+        admin_stat.update({message.id: 5892994739})
+        markup = quick_markup({
+            "reply": {"callback_data": "replyAdmin"}
+        }, row_width=1)
         user_id = user_stat.get(msg_id)
         bot.send_message(user_id, f"<b>You have a reply from admin</b>", parse_mode="HTML")
         bot.copy_message(user_id, message.from_user.id, message.id, reply_to_message_id=msg_id)
         bot.reply_to(message, "Reply has been sent.")
+        print(message.id)
     except Exception as e:
         bot.send_message(admin_id, f"Error in replying as {e}")
     
@@ -499,8 +505,10 @@ def process_user_reply(message, msg_id):
 def send_reply_admin(call):
     try:
       if call.from_user.id not in blocked_users:
-         bot.send_message(call.from_user.id , f"Send your reply {call.from_user.first_name}")
-         bot.register_next_step_handler(call.message, admin_replier)
+         msg_id = call.message.id - 2
+         print(call.message.id)
+         bot.send_message(call.from_user.id , f"Send your reply")
+         bot.register_next_step_handler(call.message, lambda msg: process_admin_reply(msg, msg_id))
       else:
           bot.send_message(call.from_user.id, "Oops you are blocked")
     except Exception as e:
@@ -508,7 +516,7 @@ def send_reply_admin(call):
         bot.send_message(call.from_user.id, "There hass been a problem for the time being user /msg")
 
 # working on it
-def admin_replier(message):
+def process_admin_reply(message, msg_id):
     try:
         markup = quick_markup({
                         'reply': {'callback_data': 'reply'},
@@ -516,12 +524,14 @@ def admin_replier(message):
                         'ban': {'switch_inline_query_current_chat': f'/ban {message.from_user.id}'},
                         'direct': {'switch_inline_query_current_chat': f'/dir {message.from_user.id}'}
                     }, row_width=2)
-        bot.copy_message(admin_id, message.from_user.id, message.id, reply_markup=markup)
+        bot.copy_message(admin_id, message.from_user.id, message.id, reply_markup=markup, 
+                         reply_to_message_id=msg_id)
+        user_stat.update({message.id: message.from_user.id})
+        bot.send_message(data_base_channel, f"users stats : {user_stat}")
         bot.reply_to(message, "Your reply has been sent.")
-        bot.user_data = {"user_id": message.from_user.id, "msg_id": message.id}
     except Exception as e:
         bot.reply_to(message, "Oops there has been a problem please try again later or use /msg")
-        bot.send_message(admin_id, "Error in client to admin reply as {e}")
+        bot.send_message(admin_id, f"Error in client to admin reply as {e}")
 
 
 @bot.callback_query_handler(func=lambda call: call.data == "block")
