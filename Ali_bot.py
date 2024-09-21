@@ -327,11 +327,12 @@ def send_song(message):
     markup = quick_markup({
         'Sent by anon.': {'url': 'https://t.me/thetouyas'}
     })
-    banned_artist = ["Taylor Swift", "Ice Spice", "Amir Tataloo", "Shayea", "Zedbazi"]
+    banned_artist = ["Taylor Swift", "Ice Spice", "Amir Tataloo", "Shayea", "Zedbazi", "Unkown Artist",
+                     "Mitski","6ix9ine", "Reza Pishro", "Ali Owj", "Sijal", "Behzad Leito", "Alireza JJ", "Saman Wilson"]
     try:
         if message.content_type == "audio":
             if message.audio.performer in banned_artist:
-               bot.reply_to(message, "This artist is banned from being posted in this channel")
+               bot.reply_to(message, "This artist is banned from being posted in this channel.")
             else:  
               bot.reply_to(message, "Your song has been sent.")
               audio_file = message.audio.file_id
