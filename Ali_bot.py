@@ -566,7 +566,7 @@ def checking(call):
             bot.send_message(user, "<b>Welcome, now send the song : </b>", parse_mode="HTML")
             bot.register_next_step_handler(call.message, reply_song)
         else:
-            bot.send_message(user, "You didn't join yet. Please try again.")
+            bot.answer_callback_query(call.id, "you haven't joined yet", show_alert=True)
     except Exception as e:
         bot.send_message(admin_id, f"Error in callback data join {e}")
 def reply_song(message):
