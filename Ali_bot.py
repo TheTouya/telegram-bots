@@ -10,7 +10,7 @@ from typing import List, Dict
 import json
 from functools import wraps
 load_dotenv()
-api_key = os.getenv('TEST_KEY')
+api_key = os.getenv('API_KEY')
 bot = telebot.TeleBot(api_key, parse_mode=None)
 
 ADMIN_ID = os.getenv('ADMIN_ID')
