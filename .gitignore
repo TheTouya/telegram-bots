@@ -1,3 +1,5 @@
-.env
+*.env
 .idea/
 .venv
+organizing_users.py
+*.json
