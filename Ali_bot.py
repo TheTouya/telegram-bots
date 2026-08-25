@@ -17,12 +17,8 @@ ADMIN_ID = os.getenv('ADMIN_ID')
 ADMIN_PANEL_PASSWORD = os.getenv('ADMIN_PANEL_PASSWORD')
 DATASET_FILE = "users.json"
 LEGACY_BLOCKED_USERS = {1717677479}
-dsbm_files_id = os.getenv("DSBM_FILE_IDS")
-jazz_files_id=os.getenv("JAZZ_FILE_IDS")
-data_base_channel = os.getenv("DATA_BASE_CHANNEL")
-daily_channel = os.getenv("THETOUYAS")
-jazz_list = [x.strip() for x in jazz_files_id.split(",") if x.strip()]
-audio_list_dsbm = [x.strip() for x in dsbm_files_id.split(",") if x.strip()]
+DATABASE_CHANNEL = os.getenv("DATA_BASE_CHANNEL")
+DAILY_CHANNEL = os.getenv("THETOUYAS")
 the_time = time.time()
 blocked_users = set(LEGACY_BLOCKED_USERS)
 banned_users = []
@@ -71,7 +67,7 @@ def _member_status_is_active(status: str) -> bool:
 def _get_membership(user_id: str) -> bool:
     """Check membership without crashing the whole handler if Telegram rejects the request."""
     try:
-        member = bot.get_chat_member(daily_channel, int(user_id))
+        member = bot.get_chat_member(DAILY_CHANNEL, int(user_id))
         return _member_status_is_active(member.status)
     except Exception as e:
         bot.send_message(ADMIN_ID, f"Could not check channel membership for {user_id}: {e}")
@@ -118,7 +114,7 @@ def ensure_user(user_id: str) -> Dict:
     dataset = _getting_dataset()
 
     if user_id not in dataset:
-        bot.send_message(data_base_channel, f"A new user has started the bot {users_id}")
+        bot.send_message(DATABASE_CHANNEL, f"A new user has started the bot {users_id}")
         processing_new_user(user_id)
         dataset = _getting_dataset()
 
@@ -248,7 +244,7 @@ def converting_id_to_name():
                    name_list.append(users_info.first_name)
                 except Exception as e:
                     bot.send_message(ADMIN_ID, f"Error in getting users {x} error {e}")
-            bot.send_message(data_base_channel, f"The name of the users : {name_list}")
+            bot.send_message(DATABASE_CHANNEL, f"The name of the users : {name_list}")
             bot.send_message(ADMIN_ID, "<b>The request is done.</b>", parse_mode="HTML")
     except Exception as e :
         bot.send_message(ADMIN_ID, f"error in {e}")
@@ -392,6 +388,8 @@ def send_song(message):
     markup = quick_markup({
         'Thanks for listening.': {'url': 'https://t.me/thetouyas'}
     }, row_width=1)
+    texts = os.getenv("DSBM_FILE_IDS")
+    audio_list_dsbm = [x.strip() for x in texts.split(",") if x.strip()]
     random_number = random.randrange(len(audio_list_dsbm))
     try:
         if not audio_list_dsbm:
@@ -411,6 +409,8 @@ def send_song(message):
     markup = quick_markup({
         'Thanks for listening.': {'url': 'https://t.me/thetouyas'}
     }, row_width=1)
+    texts = os.getenv("JAZZ_FILE_IDS")
+    jazz_list = [x.strip() for x in texts.split(",") if x.strip()]
     random_number = random.randrange(len(jazz_list))
     try:
         if not jazz_list:
@@ -473,7 +473,7 @@ def sending_message(message : Message):
                     bot.send_message(ADMIN_ID, "<b>Hello Admin</b>", parse_mode="HTML")
                 else:
                     user_stat.update({message.id: message.from_user.id})
-                    bot.send_message(data_base_channel, f"users stats : {user_stat}")
+                    bot.send_message(DATABASE_CHANNEL, f"users stats : {user_stat}")
                     bot.send_message(ADMIN_ID,
                                      f"<i><b>A message from '{message.from_user.id}' \n\nWith username: "
                                      f"'@{message.from_user.username}'\n\nbio: "
@@ -570,16 +570,20 @@ def sending_tab(message):
     users_id = list(_getting_dataset().keys())
     time.sleep(60)
     bot.reply_to(message, "Times up!")
+    successes = []
+    failed = []
     for x in users_id:
       try:
         if not _is_admin(x) and is_user_blocked(x):
-            bot.send_message(data_base_channel, f"skipped blocked user {x}")
+            bot.send_message(DATABASE_CHANNEL, f"skipped blocked user {x}")
             continue
         bot.copy_message(x,message.from_user.id, message.id)
-        bot.send_message(data_base_channel, f"successfully sent to {x}")
+        successes.append(x)
+        time.sleep(0.5)
       except Exception as e:
-        bot.send_message(data_base_channel, f"unsuccessful  to {x} error {e}")
-        continue
+        failed.append(x)
+    bot.send_message(DATABASE_CHANNEL, f"Total success sents {successes}")
+    bot.send_message(DATABASE_CHANNEL, f"Total failed sents {failed}")
 
 
 @bot.message_handler(commands=["anon"])
@@ -587,7 +591,7 @@ def sending_tab(message):
 def info(message):
     sorting_users(message.from_user.id)
     user_id = message.from_user.id
-    channel_id = daily_channel
+    channel_id = DAILY_CHANNEL
     try:
         member = bot.get_chat_member(channel_id, user_id)
         if member.status in ['member', 'administrator', 'creator']:
@@ -616,7 +620,7 @@ def send_song(message):
             else:  
               bot.reply_to(message, "Your song has been sent.")
               audio_file = message.audio.file_id
-              bot.send_audio(daily_channel, audio_file, reply_markup=markup)
+              bot.send_audio(DAILY_CHANNEL, audio_file, reply_markup=markup)
               bot.send_message(ADMIN_ID, f"{message.from_user.id} {message.from_user.first_name} sent a song.")
         else:
             bot.reply_to(message, "only audio files are allowed.")
@@ -635,10 +639,10 @@ def banning(message):
             args = message.text.split()
             if len(args) > 1:
                 userID = int(args[1])
-                bot.ban_chat_member(daily_channel, userID)
+                bot.ban_chat_member(DAILY_CHANNEL, userID)
                 bot.reply_to(message, f"{userID} has been banned from @thetouyas")
                 banned_users.append(userID)
-                bot.send_message(data_base_channel, f"New user has been banned from daily channel {userID}")
+                bot.send_message(DATABASE_CHANNEL, f"New user has been banned from daily channel {userID}")
             else:
                 bot.reply_to(message, "Not valid arguments")
         except Exception as e:
@@ -705,7 +709,7 @@ def sending_name(call):
         dataset = _getting_dataset()
         for k, v in dataset.items():
             names.append(v['name'])
-        bot.send_message(data_base_channel, f"The name of the users : \n{names}")
+        bot.send_message(DATABASE_CHANNEL, f"The name of the users : \n{names}")
         bot.send_message(ADMIN_ID, "required task is done")
     except Exception as e:
         bot.send_message(ADMIN_ID, f"There was a problem in the callback {e}")
@@ -714,7 +718,7 @@ def sending_name(call):
 def sending_user(call):
     try:
         dataset = _getting_dataset()
-        bot.send_message(data_base_channel, f'total users {list(dataset.keys())}')
+        bot.send_message(DATABASE_CHANNEL, f'total users {list(dataset.keys())}')
         bot.send_message(ADMIN_ID, "<b> required task is done.</b>", parse_mode="HTML")
     except Exception as e:
         bot.send_message(ADMIN_ID, f"error in sending total users {e}")   
@@ -729,9 +733,9 @@ def sending_blocked(call):
             if v['is_blocked']:
                 names.append(v['name'])
         if len(names) == 0:
-            bot.send_message(data_base_channel, "You have no blocked users")
+            bot.send_message(DATABASE_CHANNEL, "You have no blocked users")
         else:
-            bot.send_message(data_base_channel, f'Total blokced users {names}')
+            bot.send_message(DATABASE_CHANNEL, f'Total blokced users {names}')
         bot.send_message(ADMIN_ID, "<b>required task is done</b>", parse_mode="HTML")
     except Exception as e:
         bot.send_message(ADMIN_ID, f"error in sending total blocked as {e}")
@@ -761,21 +765,25 @@ def password_call(message):
     else:
         bot.reply_to(message, "The password is wrong. The function has been cancelled.")
 def sending_tab_call(message):
-    bot.send_message(ADMIN_ID, "you have 30 seconds to make any changes in your tab")
-    time.sleep(30)
+    bot.send_message(ADMIN_ID, "you have 60 seconds to make any changes in your tab")
+    time.sleep(60)
     bot.reply_to(message, "Times up!")
     dataset = _getting_dataset()
+    success = []
+    failed = []
     for x in list(dataset.keys()):
       try:
-        if not _is_admin(x) and is_user_blocked(x):
-            bot.send_message(data_base_channel, f"skipped blocked user {x}")
-            continue
         bot.copy_message(x,message.from_user.id, message.id)
-        bot.send_message(data_base_channel, f"successfully sent to {x}")
+        success.append(x)
+        time.sleep(0.5)
       except Exception as e:
-        bot.send_message(data_base_channel, f"unsuccessful  to {x} error {e}")
-        continue
+        failed.append(x)
     del dataset
+    bot.send_message(DATABASE_CHANNEL, f"Total success sents {success}")
+    bot.send_message(DATABASE_CHANNEL, f"Total failed sents {failed}")
+    del success
+    del failed
+    
 
 
 @bot.callback_query_handler(func=lambda call: call.data == "reply")
@@ -835,7 +843,7 @@ def process_admin_reply(message, msg_id):
         bot.copy_message(ADMIN_ID, message.from_user.id, message.id, reply_markup=markup, 
                          reply_to_message_id=msg_id)
         user_stat.update({message.id: message.from_user.id})
-        bot.send_message(data_base_channel, f"users stats : {user_stat}")
+        bot.send_message(DATABASE_CHANNEL, f"users stats : {user_stat}")
         bot.reply_to(message, "Your reply has been sent.")
     except Exception as e:
         bot.reply_to(message, "Oops there has been a problem please try again later or use /msg")
@@ -878,7 +886,7 @@ def blocking(call):
 @callback_access_required
 def checking(call):
     user = call.from_user.id
-    channel_id = daily_channel
+    channel_id = DAILY_CHANNEL
     msg_id = call.message.id
     try:
         member = bot.get_chat_member(channel_id, user)
@@ -901,7 +909,7 @@ def reply_song(message):
         if message.content_type == "audio":
             bot.reply_to(message, "Your song has been sent.")
             audio_file = message.audio.file_id
-            bot.send_audio(daily_channel, audio_file, reply_markup=markup)
+            bot.send_audio(DAILY_CHANNEL, audio_file, reply_markup=markup)
             bot.send_message(ADMIN_ID, f"{message.from_user.id} {message.from_user.first_name} sent a song.")
         else:
             bot.reply_to(message, "only audio files are allowed.")
@@ -921,6 +929,10 @@ def canceling(call):
     except Exception as e :
         bot.send_message(ADMIN_ID, f"Error is cancelling replies as {e}")
 
+@bot.message_handler(content_types=["audio"])
+def sending_audio_id(msg : Message) -> None:
+    if str(msg.from_user.id) == ADMIN_ID:
+        bot.send_message(ADMIN_ID, msg.audio.file_id)
 
 @bot.message_handler(content_types=["text", "sticker", "location", "photo", "audio",
                                     "animation","video","contact","document","voice","venue","dice","video_note"])
