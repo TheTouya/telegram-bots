@@ -56,7 +56,7 @@ def _save_dataset(dataset: Dict) -> None:
             raise
 
 
-def _is_admin(user_id) -> bool:
+def _is_admin(user_id : str | int) -> bool:
     return str(user_id) == str(ADMIN_ID)
 
 
